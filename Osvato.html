@@ -62,16 +62,20 @@
 }
 
 .footer-container {
-    max-width: 1200px;
+    max-width: 1000px; /* Slightly tighter max-width keeps it centered */
     margin: 0 auto;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* This keeps them spread evenly */
     align-items: flex-start;
     flex-wrap: wrap;
-    gap: 40px;
+    gap: 20px;
 }
 
-.footer-col { flex: 1; min-width: 250px; }
+.footer-col { 
+    flex: 1; 
+    min-width: 200px; 
+    padding: 0 10px; /* Adds breathing room */
+}
 
 .footer-brand h3 { color: #fff; margin: 0 0 10px 0; font-size: 16px; font-weight: 800; }
 .footer-brand p { margin: 0; line-height: 1.6; }
@@ -80,10 +84,26 @@
 .footer-links a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
 .footer-links a:hover { color: #ff66aa; }
 
+.footer-container {
+    max-width: 1000px; /* Slightly tighter max-width keeps it centered */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* This keeps them spread evenly */
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-col { 
+    flex: 1; 
+    min-width: 200px; 
+    padding: 0 10px; /* Adds breathing room */
+}
+
 .credits {
-    text-align: left; /* Changed from right to left */
+    text-align: left; /* Switched to left for better alignment with others */
     border-left: 1px solid #18181b;
-    padding-left: 40px;
+    padding-left: 30px;
 }
 
 .credit-line { margin: 5px 0; }
@@ -339,12 +359,13 @@
 </div>
 
 
-        <div class="footer-col footer-links">
-            <a href="#">Documentation</a>
-            <a href="#">API Reference</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Privacy Policy</a>
-        </div>
+<div class="footer-col footer-links">
+    <h3 style="font-size: 14px; color: #fff; margin-bottom: 10px;">Resources</h3>
+    <a href="#">Documentation</a>
+    <a href="#">API Reference</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Privacy Policy</a>
+</div>
 
         <div class="footer-col credits">
             <div class="credit-line">
