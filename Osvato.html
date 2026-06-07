@@ -60,16 +60,28 @@
 }
 
 .footer-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Brand gets more space, links/credits get less */
-    gap: 40px;
+    /* We change 2fr to 1.5fr to pull the brand closer to the center */
+    grid-template-columns: 1.5fr 1fr 1fr; 
+    gap: 60px; /* Increased gap for a more premium, spacious look */
     text-align: left;
 }
 
-.footer-brand h3 { color: #fff; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-.footer-brand p { font-size: 12px; line-height: 1.6; max-width: 250px; }
+.footer-brand {
+    /* Ensures the brand text starts at the same vertical line as everything else */
+    padding-left: 20px; 
+}
+
+.footer-brand h3 { 
+    color: #fff; 
+    margin: 0 0 10px 0; 
+    font-size: 14px; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+}
+
 
 .footer-links h3, .credits h3 { color: #fff; font-size: 12px; margin-bottom: 15px; text-transform: uppercase; }
 .footer-links a, .credit-line a { color: #888; text-decoration: none; display: block; margin-bottom: 8px; font-size: 12px; }
