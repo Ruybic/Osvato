@@ -50,49 +50,30 @@
         }
         .library-btn:hover { background: var(--osu-pink-dark); }
 
-        /* Professional Footer Styling */
+        /* Refined Footer Styles */
 .osvato-footer {
     background: #0a0a0c;
-    color: #71717a;
-    padding: 60px 40px;
+    color: #888;
+    padding: 60px 20px;
     border-top: 1px solid #18181b;
-    font-family: 'Exo 2', sans-serif;
-    font-size: 13px;
     margin-top: auto;
 }
 
 .footer-container {
-    max-width: 1000px; /* Slightly tighter max-width keeps it centered */
+    max-width: 900px;
     margin: 0 auto;
-    display: flex;
-    justify-content: space-between; /* This keeps them spread evenly */
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr; /* Brand gets more space, links/credits get less */
+    gap: 40px;
+    text-align: left;
 }
 
-.footer-col { 
-    flex: 1; 
-    min-width: 200px; 
-    padding: 0 10px; /* Adds breathing room */
-}
+.footer-brand h3 { color: #fff; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+.footer-brand p { font-size: 12px; line-height: 1.6; max-width: 250px; }
 
-.footer-brand h3 { color: #fff; margin: 0 0 10px 0; font-size: 16px; font-weight: 800; }
-.footer-brand p { margin: 0; line-height: 1.6; }
-
-.footer-links { display: flex; flex-direction: column; gap: 8px; }
-.footer-links a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
+.footer-links h3, .credits h3 { color: #fff; font-size: 12px; margin-bottom: 15px; text-transform: uppercase; }
+.footer-links a, .credit-line a { color: #888; text-decoration: none; display: block; margin-bottom: 8px; font-size: 12px; }
 .footer-links a:hover { color: #ff66aa; }
-
-.footer-container {
-    max-width: 1000px; /* Slightly tighter max-width keeps it centered */
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between; /* This keeps them spread evenly */
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 20px;
-}
 
 .footer-col { 
     flex: 1; 
@@ -346,41 +327,34 @@
 
 <footer class="osvato-footer">
     <div class="footer-container">
-        
-<div class="footer-col footer-brand">
-    <h3>Osvato.</h3>
-    <p>Modular precision for your stream. Open source, community driven, and built for creators.</p>
-    <p style="margin-top: 15px;">
-        This work is marked 
-        <a href="https://creativecommons.org/publicdomain/zero/1.0/" style="color:#ff66aa; text-decoration: none;">CC0 1.0</a>
-        <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em; max-height: 1em; margin-left: 5px; vertical-align: middle;">
-        <img src="https://mirrors.creativecommons.org/presskit/icons/zero.svg" alt="" style="max-width: 1em; max-height: 1em; margin-left: 2px; vertical-align: middle;">
-    </p>
-</div>
-
-
-<div class="footer-col footer-links">
-    <h3 style="font-size: 14px; color: #fff; margin-bottom: 10px;">Resources</h3>
-    <a href="#">Documentation</a>
-    <a href="#">API Reference</a>
-    <a href="#">Terms of Service</a>
-    <a href="#">Privacy Policy</a>
-</div>
-
-        <div class="footer-col credits">
-            <div class="credit-line">
-                Designed with <a href="https://gemini.google.com/" class="credit-link">Gemini</a>
-            </div>
-            <div class="credit-line">
-                Audio tools by <a href="https://www.image-line.com/" class="credit-link">FL Studio</a>
-            </div>
-            <div class="credit-line" style="margin-top: 15px; font-size: 11px;">
-                Not affiliated with ppy Pty Ltd.
-            </div>
+        <div class="footer-brand">
+            <h3>Osvato.</h3>
+            <p>Modular precision for your stream. Open source, community driven.</p>
+            <p style="font-size: 11px;">
+                <a href="https://creativecommons.org/publicdomain/zero/1.0/" style="color:#ff66aa;">CC0 1.0</a>
+                <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="width:12px; vertical-align:middle; margin-left:5px;">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/zero.svg" style="width:12px; vertical-align:middle;">
+            </p>
         </div>
 
+        <div class="footer-links">
+            <h3>Resources</h3>
+            <a href="#">Documentation</a>
+            <a href="#">API Reference</a>
+            <a href="#">Terms</a>
+        </div>
+
+        <div class="credits">
+            <h3>Credits</h3>
+            <div class="credit-line">
+                <a href="https://gemini.google.com/">Built with Gemini</a>
+                <a href="https://www.image-line.com/">Audio by FL Studio</a>
+            </div>
+            <p style="font-size: 10px; margin-top: 10px; color:#444;">Not affiliated with ppy Ppy Ltd.</p>
+        </div>
     </div>
 </footer>
+
 
 
 
