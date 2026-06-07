@@ -50,6 +50,46 @@
         }
         .library-btn:hover { background: var(--osu-pink-dark); }
 
+        /* Professional Footer Styling */
+.osvato-footer {
+    background: #0a0a0c;
+    color: #71717a;
+    padding: 60px 40px;
+    border-top: 1px solid #18181b;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.footer-col { flex: 1; min-width: 250px; }
+
+.footer-brand h3 { color: #fff; margin: 0 0 10px 0; font-size: 16px; font-weight: 800; }
+.footer-brand p { margin: 0; line-height: 1.6; }
+
+.footer-links { display: flex; flex-direction: column; gap: 8px; }
+.footer-links a { color: #a1a1aa; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: #ff66aa; }
+
+.credits {
+    text-align: right;
+    border-left: 1px solid #18181b;
+    padding-left: 40px;
+}
+
+.credit-line { margin: 5px 0; }
+.credit-link { color: #fff; text-decoration: none; font-weight: 600; }
+
+
         /* ─── MAIN LAYOUT ─── */
         main { flex: 1; }
         
@@ -284,19 +324,40 @@
 
 
 
-<footer>
-    <div style="margin-bottom: 15px; color: var(--text-muted); font-size: 13px;">
-        This work is marked 
-        <a href="https://creativecommons.org/publicdomain/zero/1.0/" style="color: var(--text-muted);">CC0 1.0</a>
-        <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em; max-height: 1em; margin-left: .2em; vertical-align: middle;">
-        <img src="https://mirrors.creativecommons.org/presskit/icons/zero.svg" alt="" style="max-width: 1em; max-height: 1em; margin-left: .2em; vertical-align: middle;">
-    </div>
+<footer class="osvato-footer">
+    <div class="footer-container">
+        
+        <div class="footer-col footer-brand">
+            <h3>Osvato.</h3>
+            <p>Modular precision for your stream. Open source, community driven, and built for creators.</p>
+            <p style="margin-top: 15px;">
+                This work is marked 
+                <a href="https://creativecommons.org/publicdomain/zero/1.0/" style="color:#ff66aa;">CC0 1.0</a>
+            </p>
+        </div>
 
-    <p style="font-size: 11px; color: #666; line-height: 1.4;">
-        Osvato is an independent project and is not affiliated with, endorsed by, or sponsored by ppy ltd.<br>
-        Please respect the intellectual property of osu! when using these tools.
-    </p>
+        <div class="footer-col footer-links">
+            <a href="#">Documentation</a>
+            <a href="#">API Reference</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+        </div>
+
+        <div class="footer-col credits">
+            <div class="credit-line">
+                Designed with <a href="https://gemini.google.com/" class="credit-link">Gemini</a>
+            </div>
+            <div class="credit-line">
+                Audio tools by <a href="https://www.image-line.com/" class="credit-link">FL Studio</a>
+            </div>
+            <div class="credit-line" style="margin-top: 15px; font-size: 11px;">
+                Not affiliated with ppy Pty Ltd.
+            </div>
+        </div>
+
+    </div>
 </footer>
+
 
 
     
