@@ -11,139 +11,165 @@
         :root {
             --osu-pink: #ff66aa;
             --osu-pink-dark: #cc4488;
-            --dark-base: #1a1a20;
-            --dark-deeper: #13131a;
-            --panel-bg: #272730;
-            --panel-border: rgba(255,255,255,0.07);
+            --dark-base: #121216;
+            --dark-deeper: #0a0a0c;
+            --panel-bg: #1c1c22;
+            --panel-border: rgba(255,255,255,0.06);
             --text-main: #ffffff;
             --text-muted: #8888a0;
-            --accent-green: #66ffbb;
+            --accent-green: #00e676;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            background-color: var(--dark-base);
-            color: var(--text-main);
+            background-color: var(--dark-base); color: var(--text-main);
             font-family: 'Exo 2', sans-serif;
-            margin: 0; padding: 0;
-            overflow-x: hidden;
+            margin: 0; padding: 0; overflow-x: hidden;
         }
 
         /* ─── HEADER ─── */
         header {
-            background: rgba(15,15,20,0.9);
-            backdrop-filter: blur(20px);
-            padding: 0 24px;
+            background: var(--dark-deeper); padding: 0 24px;
             display: flex; align-items: center; justify-content: space-between;
             border-bottom: 1px solid rgba(255,102,170,0.15);
-            position: sticky; top: 0; z-index: 1000;
-            height: 70px;
+            position: sticky; top: 0; z-index: 1000; height: 64px;
         }
-        .logo { font-weight: 900; font-size: 24px; text-decoration: none; color: white; letter-spacing: 1px; }
+        .logo { font-weight: 900; font-size: 22px; text-decoration: none; color: white; letter-spacing: 0.5px; }
         .logo span { color: var(--osu-pink); }
-        .nav-links { display: flex; gap: 20px; font-weight: 600; font-size: 15px; }
+        
+        .nav-links { display: flex; gap: 24px; font-weight: 600; font-size: 14px; align-items: center; }
         .nav-links a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
         .nav-links a:hover { color: white; }
+        
+        /* Fixed Library Button */
         .library-btn {
-            background: rgba(255,102,170,0.15); color: var(--osu-pink);
-            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--osu-pink);
-            text-decoration: none; font-weight: 700; transition: all 0.2s;
+            background: var(--osu-pink); color: white !important;
+            padding: 8px 18px; border-radius: 6px; border: none;
+            text-decoration: none; font-weight: 700; transition: background 0.2s;
         }
-        .library-btn:hover { background: var(--osu-pink); color: white; }
+        .library-btn:hover { background: var(--osu-pink-dark); }
 
         /* ─── MAIN LAYOUT ─── */
-        .hero { text-align: center; padding: 60px 20px 40px; }
-        .hero h1 { font-size: 36px; margin: 0 0 10px; font-weight: 900; }
-        .hero p { color: var(--text-muted); font-size: 16px; margin: 0; }
+        .hero { text-align: center; padding: 50px 20px 30px; }
+        .hero h1 { font-size: 32px; margin: 0 0 10px; font-weight: 900; }
+        .hero p { color: var(--text-muted); font-size: 15px; margin: 0; }
 
+        /* Envato-style compact grid */
         .marketplace-grid {
             max-width: 1200px; margin: 0 auto; padding: 0 20px 60px;
-            display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            display: grid; gap: 24px; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
 
         /* ─── ITEM CARD ─── */
         .item-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 14px; overflow: hidden;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
-        .item-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .item-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
 
-        /* Preview Area */
-        .preview-window {
-            height: 280px; background: #111; position: relative;
-            display: flex; align-items: center; justify-content: center;
+        /* ─── VISUAL AREA (SLIDER) ─── */
+        .visual-area {
+            height: 220px; position: relative; overflow: hidden;
+            background: #030305; /* Blackout background */
             border-bottom: 1px solid var(--panel-border);
-            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            overflow: hidden; perspective: 1000px;
-            /* Live CSS Variables controlled by JS */
-            --live-color-1: #0391e2;
-            --live-color-2: #52b8ff;
         }
 
-        /* Card Controls */
-        .controls { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-        .item-meta h2 { margin: 0 0 5px; font-size: 20px; font-weight: 800; }
-        .item-meta p { margin: 0; font-size: 13px; color: var(--text-muted); }
-
-        .settings-box {
-            background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border);
-            padding: 15px; border-radius: 8px; display: flex; gap: 20px;
+        /* Glowing Animated Orbs */
+        .glow-orb {
+            position: absolute; border-radius: 50%; filter: blur(40px);
+            opacity: 0.3; animation: floatGlow 6s infinite alternate; pointer-events: none;
         }
-        .color-wrap { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: #bbb; }
+        .orb-1 { width: 140px; height: 140px; background: var(--osu-pink); top: -20px; left: -20px; }
+        .orb-2 { width: 100px; height: 100px; background: #0391e2; bottom: -10px; right: -20px; animation-delay: -3s; }
+        
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, 20px) scale(1.2); }
+        }
+
+        /* The Slider Track */
+        .slider-track {
+            display: flex; width: 200%; height: 100%;
+            transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
+            transform: translateX(0%); /* 0% = Element, -50% = Code */
+        }
+        .slide { width: 50%; height: 100%; position: relative; }
+        
+        /* Pane 1: Element Preview */
+        .pane-element { display: flex; align-items: center; justify-content: center; z-index: 2; }
+        
+        /* Pane 2: Code Viewer */
+        .pane-code { background: rgba(0,0,0,0.8); display: flex; flex-direction: column; }
+        .pane-code pre { 
+            margin: 0; padding: 16px; color: #a1b5d1; font-family: monospace; 
+            font-size: 11px; overflow-y: auto; height: 100%; width: 100%;
+        }
+        .pane-code pre::-webkit-scrollbar { width: 6px; }
+        .pane-code pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        
+        .copy-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer;
+            font-family: 'Exo 2'; font-size: 11px; font-weight: 700; z-index: 10;
+            backdrop-filter: blur(4px); transition: all 0.2s;
+        }
+        .copy-btn:hover { background: white; color: black; }
+
+        /* Navigation Arrows (Hidden until purchased) */
+        .slide-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1);
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s, background 0.2s;
+        }
+        .slide-nav:hover { background: var(--osu-pink); border-color: var(--osu-pink); }
+        .nav-prev { left: 10px; }
+        .nav-next { right: 10px; }
+        .visual-area.unlocked .slide-nav { opacity: 1; pointer-events: auto; }
+
+        /* View Label */
+        .view-indicator {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px;
+            font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); z-index: 10;
+            pointer-events: none; transition: opacity 0.3s;
+        }
+
+        /* ─── CONTROLS AREA ─── */
+        .controls { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .item-meta h2 { margin: 0 0 4px; font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-meta p { margin: 0; font-size: 12px; color: var(--text-muted); }
+
+        .settings-box { display: flex; gap: 12px; }
+        .color-wrap { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 700; color: #aaa; flex: 1; }
         .color-wrap input[type="color"] {
-            background: transparent; border: 1px solid rgba(255,255,255,0.2);
-            cursor: pointer; height: 36px; width: 100%; border-radius: 4px; padding: 2px;
+            background: transparent; border: 1px solid var(--panel-border);
+            cursor: pointer; height: 30px; width: 100%; border-radius: 4px; padding: 1px;
         }
 
         .purchase-btn {
-            background: var(--osu-pink); color: white; border: none;
-            padding: 14px; border-radius: 8px; font-family: 'Exo 2'; font-weight: 800; font-size: 16px;
+            background: rgba(255,102,170,0.1); color: var(--osu-pink); 
+            border: 1px solid var(--osu-pink); padding: 10px; border-radius: 6px; 
+            font-family: 'Exo 2'; font-weight: 800; font-size: 14px;
             cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .purchase-btn:hover { background: var(--osu-pink-dark); }
-        .purchase-btn.owned { background: var(--accent-green); color: #111; }
-
-        /* Code Reveal Area */
-        .code-reveal {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0.2,0.8,0.2,1);
-            background: #0a0a0d; position: relative;
-        }
-        .code-reveal.expanded { max-height: 500px; border-top: 1px solid var(--panel-border); }
-        .code-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--panel-border);
-        }
-        .code-header span { font-size: 12px; font-weight: 700; color: var(--text-muted); }
-        .copy-btn {
-            background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);
-            padding: 4px 10px; border-radius: 4px; cursor: pointer; font-family: 'Exo 2'; font-size: 11px; font-weight: 700;
-        }
-        .copy-btn:hover { background: white; color: black; }
-        
-        pre { margin: 0; padding: 20px; color: #a1b5d1; font-family: monospace; font-size: 13px; overflow-y: auto; height: 300px; }
-
-        /* ─── FOOTER ─── */
-        footer {
-            background: var(--dark-deeper); padding: 40px 20px; text-align: center;
-            border-top: 1px solid rgba(255,102,170,0.15); margin-top: 40px;
-        }
-        .cc-badge { margin-bottom: 15px; }
-        footer p { margin: 5px 0; font-size: 13px; color: #666; max-width: 600px; margin-left: auto; margin-right: auto; }
-        footer a { color: var(--text-muted); text-decoration: underline; }
+        .purchase-btn:hover { background: var(--osu-pink); color: white; }
+        .purchase-btn.loading { background: transparent; border-color: var(--text-muted); color: var(--text-muted); cursor: wait; }
+        .purchase-btn.owned { background: rgba(0, 230, 118, 0.1); border-color: var(--accent-green); color: var(--accent-green); pointer-events: none; }
 
         /* ==============================================================
            WATERMARK COMPONENT CSS (Specifically for the live preview)
            ============================================================== */
-        .wm-3d-wrapper {
-            animation: float3D 6s infinite ease-in-out; transform-style: preserve-3d;
+        #preview-wm01 {
+            --live-color-1: #0391e2;
+            --live-color-2: #52b8ff;
         }
+        .wm-3d-wrapper { animation: float3D 6s infinite ease-in-out; transform-style: preserve-3d; transform: scale(0.85); }
         .wm-shape {
             position: relative; height: 64px; border-radius: 32px; border: 4px solid #fff; overflow: hidden;
             background: linear-gradient(90deg, var(--live-color-1), var(--live-color-2), var(--live-color-1));
@@ -153,8 +179,7 @@
         .wm-tri {
             position: absolute; bottom: -20px; width: 0; height: 0;
             border-left: 10px solid transparent; border-right: 10px solid transparent;
-            border-bottom: 15px solid rgba(255,255,255,0.3);
-            animation: miniFloat 3s infinite linear;
+            border-bottom: 15px solid rgba(255,255,255,0.3); animation: miniFloat 3s infinite linear;
         }
         .wm-content { display: flex; align-items: center; height: 100%; width: 230px; }
         .wm-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding-left: 4.9px; }
@@ -171,11 +196,12 @@
 <body>
 
     <header>
-        <a href="#" class="logo">Osvato<span>.</span></a>
+        <a href="#" class="logo"><span>O</span>svato.</a>
         <div class="nav-links">
-            <a href="#">Widgets</a>
-            <a href="#">UI Kits</a>
-            <a href="#">Skins</a>
+            <a href="#">Stream Overlays</a>
+            <a href="#">UI Elements</a>
+            <a href="#">Skin Assets</a>
+            <a href="#">Utilities</a>
             <a href="#" class="library-btn">My Library</a>
         </div>
     </header>
@@ -189,84 +215,89 @@
         
         <article class="item-card">
             
-            <div class="preview-window" id="preview-wm01">
-                <div class="wm-3d-wrapper">
-                    <div class="wm-shape">
-                        <div class="wm-tri" style="left: 20%; animation-delay: 0s;"></div>
-                        <div class="wm-tri" style="left: 60%; animation-delay: 1.5s;"></div>
-                        <div class="wm-content">
-                            <div class="wm-icon"><div class="wm-pic"></div></div>
-                            <div class="wm-text">@Heaven501</div>
+            <div class="visual-area" id="visual-wm01">
+                <div class="glow-orb orb-1"></div>
+                <div class="glow-orb orb-2"></div>
+
+                <button class="slide-nav nav-prev" id="prev-wm01">&#10094;</button>
+                <button class="slide-nav nav-next" id="next-wm01">&#10095;</button>
+                
+                <div class="view-indicator" id="indicator-wm01">Preview</div>
+
+                <div class="slider-track" id="track-wm01">
+                    
+                    <div class="slide pane-element" id="preview-wm01">
+                        <div class="wm-3d-wrapper">
+                            <div class="wm-shape">
+                                <div class="wm-tri" style="left: 20%; animation-delay: 0s;"></div>
+                                <div class="wm-tri" style="left: 60%; animation-delay: 1.5s;"></div>
+                                <div class="wm-content">
+                                    <div class="wm-icon"><div class="wm-pic"></div></div>
+                                    <div class="wm-text">@Heaven501</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="slide pane-code">
+                        <button class="copy-btn" id="copy-wm01">Copy</button>
+                        <pre><code id="code-wm01"></code></pre>
+                    </div>
+
                 </div>
             </div>
 
             <div class="controls">
                 <div class="item-meta">
                     <h2>3D Expanding Watermark</h2>
-                    <p>OBS Browser Source • Animated • CSS Only</p>
+                    <p>OBS Browser Source • CSS Only</p>
                 </div>
 
                 <div class="settings-box">
-                    <div class="color-wrap" style="flex:1;">
+                    <div class="color-wrap">
                         <label>Main Base</label>
                         <input type="color" id="color1-wm01" value="#0391e2">
                     </div>
-                    <div class="color-wrap" style="flex:1;">
+                    <div class="color-wrap">
                         <label>Highlight</label>
                         <input type="color" id="color2-wm01" value="#52b8ff">
                     </div>
                 </div>
 
                 <button class="purchase-btn" id="btn-wm01">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Get Code (Free)
                 </button>
             </div>
 
-            <div class="code-reveal" id="reveal-wm01">
-                <div class="code-header">
-                    <span>index.html</span>
-                    <button class="copy-btn" id="copy-wm01">Copy to Clipboard</button>
-                </div>
-                <pre><code id="code-wm01"></code></pre>
-            </div>
         </article>
-
-    </main>
-
-    <footer>
-        <div class="cc-badge">
-            <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/">
-                <img src="https://licensebuttons.net/p/zero/1.0/88x31.png" style="border-style: none;" alt="CC0" />
-            </a>
-        </div>
-        <p>To the extent possible under law, <strong>Osvato</strong> has waived all copyright and related or neighboring rights to these assets. This work is published from: Iraq.</p>
-        <p style="margin-top: 15px; font-size: 11px;">
-            Osvato is an independent project and is not affiliated with, endorsed by, or sponsored by ppy ltd.<br>
-            Please respect the intellectual property of osu! when using these tools.
-        </p>
-    </footer>
+        </main>
 
     <script>
         // ─── LOGIC FOR ITEM 1: 3D WATERMARK ─── //
         
-        // DOM Elements
-        const previewWin = document.getElementById('preview-wm01');
+        // Elements
+        const visualArea = document.getElementById('visual-wm01');
+        const track = document.getElementById('track-wm01');
+        const previewEl = document.getElementById('preview-wm01');
         const color1Inp = document.getElementById('color1-wm01');
         const color2Inp = document.getElementById('color2-wm01');
         const purchaseBtn = document.getElementById('btn-wm01');
-        const codeReveal = document.getElementById('reveal-wm01');
         const codeBlock = document.getElementById('code-wm01');
         const copyBtn = document.getElementById('copy-wm01');
+        
+        // Navigation Elements
+        const prevBtn = document.getElementById('prev-wm01');
+        const nextBtn = document.getElementById('next-wm01');
+        const indicator = document.getElementById('indicator-wm01');
+
+        let isShowingCode = false;
 
         // Function to generate the clean code string
         function generateCode() {
             const c1 = color1Inp.value;
             const c2 = color2Inp.value;
 
-            // Template literal holding the exact raw code for the user
             const rawCode = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -310,21 +341,10 @@
         .wm-pic { width: 44px; height: 44px; border-radius: 50%; background: url('https://litter.catbox.moe/jqckapgn7924tm9q.png') center/cover; border: 2px solid #fff; }
         .wm-text { color: white; font-weight: 900; font-size: 18px; padding-left: 12px; white-space: nowrap; }
 
-        @keyframes float3D { 
-            0%, 100% { transform: rotateY(25deg) rotateX(10deg) translateY(0); } 
-            50% { transform: rotateY(20deg) rotateX(15deg) translateY(-8px); } 
-        }
-        @keyframes expandCollapse {
-            0%, 15% { width: 64px; }		
-            30%, 85% { width: 240px; }	  
-            100% { width: 64px; }		   
-        }
+        @keyframes float3D { 0%, 100% { transform: rotateY(25deg) rotateX(10deg) translateY(0); } 50% { transform: rotateY(20deg) rotateX(15deg) translateY(-8px); } }
+        @keyframes expandCollapse { 0%, 15% { width: 64px; } 30%, 85% { width: 240px; } 100% { width: 64px; } }
         @keyframes moveBg { to { background-position: 200% center; } }
-        @keyframes miniFloat {
-            0% { transform: translateY(0); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-80px) rotate(30deg); opacity: 0; }
-        }
+        @keyframes miniFloat { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-80px) rotate(30deg); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -333,7 +353,6 @@
             <div class="wm-shape">
                 <div class="wm-tri" style="left: 20%; animation-delay: 0s;"></div>
                 <div class="wm-tri" style="left: 60%; animation-delay: 1.5s;"></div>
-                
                 <div class="wm-content">
                     <div class="wm-icon"><div class="wm-pic"></div></div>
                     <div class="wm-text">@Heaven501</div>
@@ -343,33 +362,53 @@
     </div>
 </body>
 </html>`;
-            // Escape HTML entities automatically by using textContent
             codeBlock.textContent = rawCode;
         }
 
-        // Event Listeners for Live Color Picking
+        // Handle Live Color Picking
         function handleColorChange() {
-            // 1. Update Preview CSS Variables
-            previewWin.style.setProperty('--live-color-1', color1Inp.value);
-            previewWin.style.setProperty('--live-color-2', color2Inp.value);
-            // 2. Update Code String
+            visualArea.style.setProperty('--live-color-1', color1Inp.value);
+            visualArea.style.setProperty('--live-color-2', color2Inp.value);
             generateCode();
         }
-
         color1Inp.addEventListener('input', handleColorChange);
         color2Inp.addEventListener('input', handleColorChange);
 
-        // "Purchase" Event
+        // Slide Navigation Logic
+        function updateSlider() {
+            if (isShowingCode) {
+                track.style.transform = 'translateX(-50%)';
+                indicator.textContent = 'Code View';
+            } else {
+                track.style.transform = 'translateX(0%)';
+                indicator.textContent = 'Live Preview';
+            }
+        }
+        prevBtn.addEventListener('click', () => { isShowingCode = !isShowingCode; updateSlider(); });
+        nextBtn.addEventListener('click', () => { isShowingCode = !isShowingCode; updateSlider(); });
+
+        // Purchase Logic with Animation
         purchaseBtn.addEventListener('click', () => {
-            codeReveal.classList.add('expanded');
-            purchaseBtn.classList.add('owned');
-            purchaseBtn.innerHTML = `&#10003; Added to Library`;
+            // 1. Loading State
+            purchaseBtn.classList.add('loading');
+            purchaseBtn.innerHTML = `Processing...`;
             
-            // Simulated backend/library logic via LocalStorage
-            localStorage.setItem('osvato_3d_watermark', 'purchased');
+            // 2. Fake delay for the "Purchase" animation
+            setTimeout(() => {
+                purchaseBtn.classList.remove('loading');
+                purchaseBtn.classList.add('owned');
+                purchaseBtn.innerHTML = `&#10003; Added to Library`;
+                
+                // Unlock the visual area arrows and auto-slide to code
+                visualArea.classList.add('unlocked');
+                isShowingCode = true;
+                updateSlider();
+
+                localStorage.setItem('osvato_3d_watermark', 'purchased');
+            }, 800);
         });
 
-        // Copy to Clipboard Event
+        // Copy Code Button
         copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(codeBlock.textContent).then(() => {
                 const originalText = copyBtn.innerText;
@@ -378,13 +417,13 @@
                 copyBtn.style.color = "black";
                 setTimeout(() => {
                     copyBtn.innerText = originalText;
-                    copyBtn.style.background = "transparent";
-                    copyBtn.style.color = "var(--text-muted)";
+                    copyBtn.style.background = "rgba(255,255,255,0.1)";
+                    copyBtn.style.color = "white";
                 }, 2000);
             });
         });
 
-        // Initialize code on page load
+        // Init
         generateCode();
 
     </script>
