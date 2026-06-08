@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Platform Pills — Osvato Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --osu-pink:#ff66aa; --osu-pink-dark:#cc4488; --dark-base:#121216; --dark-deeper:#0a0a0c; --panel-bg:#1c1c22; --panel-border:rgba(255,255,255,0.08); --text-main:#fff; --text-muted:#8888a0; --accent-green:#00e676; }
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{height:100%;margin:0;padding:0;background:var(--dark-base);color:var(--text-main);font-family:'Exo 2',sans-serif;overflow:hidden;}
+        header{background:var(--dark-deeper);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,102,170,0.15);height:64px;flex-shrink:0;}
+        .logo{font-weight:900;font-size:22px;text-decoration:none;color:white;letter-spacing:0.5px;}.logo span{color:var(--osu-pink);}
+        .page-title{font-size:14px;font-weight:800;color:white;}
+        .back-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 16px;border-radius:6px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+        .back-btn:hover{color:white;border-color:rgba(255,255,255,0.25);}
+        .page-body{display:flex;flex-direction:column;height:100vh;}
+        .editor-row{display:flex;flex:1;min-height:0;}
+        .left-panel{width:300px;flex-shrink:0;background:var(--dark-deeper);border-right:1px solid var(--panel-border);overflow-y:auto;overflow-x:hidden;}
+        .left-panel::-webkit-scrollbar{width:5px;}.left-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+        .section{padding:16px 20px;border-bottom:1px solid var(--panel-border);}
+        .section-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;}
+        .field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+        .field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .field input[type="text"]{width:100%;background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:8px 10px;border-radius:5px;font-family:'Exo 2';font-size:13px;font-weight:600;}
+        .field input[type="text"]:focus{outline:none;border-color:var(--osu-pink);}
+        .color-field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .color-field input[type="color"]{width:100%;height:34px;border-radius:5px;padding:2px 4px;background:var(--panel-bg);border:1px solid var(--panel-border);cursor:pointer;}
+        .platform-block{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:6px;padding:12px;margin-bottom:10px;}
+        .platform-block:last-child{margin-bottom:0;}
+        .platform-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+        .platform-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+        .platform-name{font-size:12px;font-weight:800;color:white;}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .action-btn{width:100%;background:var(--osu-pink);color:white;border:none;padding:10px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;margin-bottom:8px;}
+        .action-btn:last-child{margin-bottom:0;}.action-btn:hover{background:var(--osu-pink-dark);}
+        .action-btn.secondary{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);font-weight:700;}
+        .action-btn.secondary:hover{color:#ff6b6b;border-color:rgba(255,80,80,0.4);background:transparent;}
+        .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+        .tabs{display:flex;background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:0 20px;flex-shrink:0;}
+        .tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:'Exo 2';border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+        .tab.active{color:white;border-bottom-color:var(--osu-pink);}.tab:hover:not(.active){color:rgba(255,255,255,0.6);}
+        .tab-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}.tab-pane.active{display:flex;}
+        .preview-area{flex:1;overflow:hidden;position:relative;background-color:#050508;background-image:radial-gradient(rgba(255,255,255,0.1) 1.5px,transparent 1.5px);background-size:20px 20px;animation:panBg 15s linear infinite;}
+        @keyframes panBg{from{background-position:0 0;}to{background-position:-40px -40px;}}
+        .preview-footer{background:var(--dark-deeper);border-top:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;flex-shrink:0;}
+        .preview-footer label{color:var(--text-muted);font-weight:700;}
+        .preview-footer select{background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:5px 8px;border-radius:4px;font-family:'Exo 2';font-size:12px;font-weight:600;}
+
+        /* PILL COMPONENT */
+        #pill-anchor{position:absolute;top:30px;left:30px;height:44px;display:inline-flex;align-items:center;}
+        .bc-pill{position:absolute;left:0;top:0;height:100%;background:#0a0a0c;border-radius:22px;border:2px solid rgba(255,255,255,0.06);display:flex;align-items:center;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.5);animation:cycleSeq 15s infinite ease-in-out;opacity:0;width:0;}
+        .bc-pill.p-twitter{animation-delay:0s;}.bc-pill.p-twitch{animation-delay:5s;}.bc-pill.p-youtube{animation-delay:10s;}
+        .bc-content{display:flex;align-items:center;width:240px;height:100%;padding-left:6px;}
+        .bc-icon-box{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .bc-icon-box svg{width:16px;height:16px;fill:#fff;}
+        .bc-text{display:flex;flex-direction:column;padding-left:12px;}
+        .bc-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;line-height:1;}
+        .bc-handle{font-size:14px;font-weight:700;color:#fff;line-height:1.3;}
+        @keyframes cycleSeq{0%{width:44px;opacity:0;transform:scale(0.9) translateX(-10px);}3.33%{opacity:1;transform:scale(1) translateX(0);}6.66%,26.66%{width:220px;opacity:1;}30%{width:44px;opacity:1;}33.33%,100%{width:44px;opacity:0;transform:scale(0.9) translateX(10px);}}
+
+        /* CODE */
+        .code-toolbar{background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .code-meta{display:flex;align-items:center;gap:10px;}
+        .lang-tag{background:rgba(255,102,170,0.1);border:1px solid rgba(255,102,170,0.2);color:var(--osu-pink);padding:3px 9px;border-radius:4px;font-size:11px;font-weight:800;}
+        .line-count{font-size:11px;color:var(--text-muted);font-weight:600;}
+        .code-actions{display:flex;gap:8px;}
+        .dl-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 14px;border-radius:5px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;}
+        .dl-btn:hover{border-color:rgba(255,255,255,0.2);color:white;}
+        .copy-code-btn{background:var(--osu-pink);color:white;border:none;padding:7px 16px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;}
+        .copy-code-btn:hover{background:var(--osu-pink-dark);}.copy-code-btn.copied{background:var(--accent-green);color:#000;}
+        .code-scroll{flex:1;overflow:auto;min-height:0;}
+        .code-scroll::-webkit-scrollbar{width:8px;height:8px;}.code-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+        .code-scroll pre{margin:0;padding:20px;color:#b4c7e7;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre;min-width:max-content;}
+    </style>
+</head>
+<body>
+<div class="page-body">
+    <header>
+        <a href="Osvato.html" class="logo"><span>Os</span>vato.</a>
+        <span class="page-title" id="page-title">Loading...</span>
+        <a href="Osvato.html" class="back-btn">← Back</a>
+    </header>
+    <div class="editor-row">
+        <aside class="left-panel">
+            <div class="section">
+                <div class="section-title">Twitter / X</div>
+                <div class="platform-block">
+                    <div class="platform-header"><div class="platform-dot" id="dot-twitter" style="background:#1da1f2;"></div><span class="platform-name">Twitter / X</span></div>
+                    <div class="field"><label>Handle</label><input type="text" id="twitter-handle" value="@Osvato"></div>
+                    <div class="color-field"><label>Color</label><input type="color" id="twitter-color" value="#1da1f2"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Twitch</div>
+                <div class="platform-block">
+                    <div class="platform-header"><div class="platform-dot" id="dot-twitch" style="background:#9146ff;"></div><span class="platform-name">Twitch</span></div>
+                    <div class="field"><label>Handle</label><input type="text" id="twitch-handle" value="Osvato"></div>
+                    <div class="color-field"><label>Color</label><input type="color" id="twitch-color" value="#9146ff"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">YouTube</div>
+                <div class="platform-block">
+                    <div class="platform-header"><div class="platform-dot" id="dot-youtube" style="background:#ff0000;"></div><span class="platform-name">YouTube</span></div>
+                    <div class="field"><label>Handle</label><input type="text" id="youtube-handle" value="OsvatoOsu"></div>
+                    <div class="color-field"><label>Color</label><input type="color" id="youtube-color" value="#ff0000"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Position</div>
+                <div class="two-col">
+                    <div class="field"><label>Top</label><input type="text" id="pos-top" value="30px"></div>
+                    <div class="field"><label>Left</label><input type="text" id="pos-left" value="30px"></div>
+                </div>
+            </div>
+            <div class="section">
+                <button class="action-btn" onclick="copyCode()">Copy Code</button>
+                <button class="action-btn" onclick="downloadCode()">Download .html</button>
+                <button class="action-btn secondary" onclick="resetAll()">↺ Reset</button>
+            </div>
+        </aside>
+
+        <section class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview',this)">Live Preview</button>
+                <button class="tab" onclick="switchTab('code',this)">Code</button>
+            </div>
+            <div class="tab-pane active" id="tab-preview">
+                <div class="preview-area" id="preview-area">
+                    <div id="pill-anchor">
+                        <div class="bc-pill p-twitter" id="pill-twitter">
+                            <div class="bc-content">
+                                <div class="bc-icon-box" id="icon-twitter" style="background:#1da1f2;box-shadow:0 0 10px #1da1f2;">
+                                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </div>
+                                <div class="bc-text">
+                                    <span class="bc-label" id="label-twitter" style="color:#1da1f2;">Twitter</span>
+                                    <span class="bc-handle" id="handle-twitter">@Osvato</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bc-pill p-twitch" id="pill-twitch">
+                            <div class="bc-content">
+                                <div class="bc-icon-box" id="icon-twitch" style="background:#9146ff;box-shadow:0 0 10px #9146ff;">
+                                    <svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+                                </div>
+                                <div class="bc-text">
+                                    <span class="bc-label" id="label-twitch" style="color:#9146ff;">Twitch</span>
+                                    <span class="bc-handle" id="handle-twitch">Osvato</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bc-pill p-youtube" id="pill-youtube">
+                            <div class="bc-content">
+                                <div class="bc-icon-box" id="icon-youtube" style="background:#ff0000;box-shadow:0 0 10px #ff0000;">
+                                    <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                </div>
+                                <div class="bc-text">
+                                    <span class="bc-label" id="label-youtube" style="color:#ff0000;">YouTube</span>
+                                    <span class="bc-handle" id="handle-youtube">OsvatoOsu</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <label>Background:</label>
+                    <select id="bg-select" onchange="changeBg(this.value)">
+                        <option value="#050508">Dark (default)</option>
+                        <option value="#000000">Pure Black</option>
+                        <option value="#1a1a2e">Deep Blue</option>
+                        <option value="#2a1a2e">Purple</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-code">
+                <div class="code-toolbar">
+                    <div class="code-meta"><span class="lang-tag">HTML</span><span class="line-count" id="line-count"></span></div>
+                    <div class="code-actions">
+                        <button class="dl-btn" onclick="downloadCode()">Download .html</button>
+                        <button class="copy-code-btn" id="copy-code-btn" onclick="copyCode()">Copy Code</button>
+                    </div>
+                </div>
+                <div class="code-scroll"><pre id="code-output"></pre></div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    let ITEM = null;
+    const ITEM_ID = 2;
+    const state = { twitterHandle:'@Osvato', twitterColor:'#1da1f2', twitchHandle:'Osvato', twitchColor:'#9146ff', youtubeHandle:'OsvatoOsu', youtubeColor:'#ff0000', posTop:'30px', posLeft:'30px', bgColor:'#050508' };
+
+    async function loadItem() {
+        try {
+            const res = await fetch('Elements/Elements.json');
+            const data = await res.json();
+            ITEM = data.items.find(i => i.id === ITEM_ID);
+            if (ITEM) { document.getElementById('page-title').textContent = ITEM.title; applyDefaults(ITEM.defaults); }
+        } catch(e) { console.warn('Could not load Elements.json:', e); }
+        refresh();
+    }
+
+    function applyDefaults(d) {
+        document.getElementById('twitter-handle').value = d.twitterHandle; state.twitterHandle = d.twitterHandle;
+        document.getElementById('twitter-color').value = d.twitterColor; state.twitterColor = d.twitterColor;
+        document.getElementById('twitch-handle').value = d.twitchHandle; state.twitchHandle = d.twitchHandle;
+        document.getElementById('twitch-color').value = d.twitchColor; state.twitchColor = d.twitchColor;
+        document.getElementById('youtube-handle').value = d.youtubeHandle; state.youtubeHandle = d.youtubeHandle;
+        document.getElementById('youtube-color').value = d.youtubeColor; state.youtubeColor = d.youtubeColor;
+        document.getElementById('pos-top').value = d.positionTop||'30px'; state.posTop = d.positionTop||'30px';
+        document.getElementById('pos-left').value = d.positionLeft||'30px'; state.posLeft = d.positionLeft||'30px';
+    }
+
+    function updatePreview() {
+        document.getElementById('preview-area').style.backgroundColor = state.bgColor;
+        document.getElementById('pill-anchor').style.top = state.posTop;
+        document.getElementById('pill-anchor').style.left = state.posLeft;
+        ['twitter','twitch','youtube'].forEach(p => {
+            const c = state[p+'Color'];
+            document.getElementById('icon-'+p).style.background = c;
+            document.getElementById('icon-'+p).style.boxShadow = `0 0 10px ${c}`;
+            document.getElementById('label-'+p).style.color = c;
+            document.getElementById('handle-'+p).textContent = state[p+'Handle'];
+            document.getElementById('dot-'+p).style.background = c;
+        });
+    }
+
+    const TWI_SVG = `<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+    const TVH_SVG = `<svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>`;
+    const YTB_SVG = `<svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+
+    function generateCode() {
+        if (!ITEM) return '';
+        const {twitterHandle,twitterColor,twitchHandle,twitchColor,youtubeHandle,youtubeColor,posTop,posLeft} = state;
+        const code = `<!DOCTYPE html>\n<html lang="en">\n<head>\n\t<meta charset="UTF-8">\n\t<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700;900&display=swap" rel="stylesheet">\n\t<style>\n\t\t:root { --color-twitter: ${twitterColor}; --color-twitch: ${twitchColor}; --color-youtube: ${youtubeColor}; }\n\t\tbody { margin:0; padding:0; background:transparent; font-family:'Exo 2',sans-serif; }\n\t\t.breadcrumb-anchor { position:fixed; top:${posTop}; left:${posLeft}; height:44px; display:inline-flex; align-items:center; }\n\t\t.bc-pill { position:absolute; left:0; top:0; height:100%; background:#0a0a0c; border-radius:22px; border:2px solid rgba(255,255,255,0.06); display:flex; align-items:center; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.5); animation:cycleSequence 15s infinite ease-in-out; opacity:0; width:0; }\n\t\t.bc-pill.twitter { animation-delay:0s; --platform-color:var(--color-twitter); }\n\t\t.bc-pill.twitch  { animation-delay:5s;  --platform-color:var(--color-twitch); }\n\t\t.bc-pill.youtube { animation-delay:10s; --platform-color:var(--color-youtube); }\n\t\t.bc-content { display:flex; align-items:center; width:240px; height:100%; padding-left:6px; }\n\t\t.bc-icon-box { width:32px; height:32px; border-radius:50%; background:var(--platform-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 10px var(--platform-color); }\n\t\t.bc-icon-box svg { width:16px; height:16px; fill:#fff; }\n\t\t.bc-text-container { display:flex; flex-direction:column; padding-left:12px; }\n\t\t.bc-platform-label { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--platform-color); line-height:1; }\n\t\t.bc-handle { font-size:14px; font-weight:700; color:#ffffff; line-height:1.3; }\n\t\t@keyframes cycleSequence { 0%{width:44px;opacity:0;transform:scale(0.9) translateX(-10px);} 3.33%{opacity:1;transform:scale(1) translateX(0);} 6.66%,26.66%{width:220px;opacity:1;} 30%{width:44px;opacity:1;} 33.33%,100%{width:44px;opacity:0;transform:scale(0.9) translateX(10px);} }\n\t</style>\n</head>\n<body>\n\t<div class="breadcrumb-anchor">\n\t\t<div class="bc-pill twitter"><div class="bc-content"><div class="bc-icon-box">${TWI_SVG}</div><div class="bc-text-container"><span class="bc-platform-label">Twitter</span><span class="bc-handle">${twitterHandle}</span></div></div></div>\n\t\t<div class="bc-pill twitch"><div class="bc-content"><div class="bc-icon-box">${TVH_SVG}</div><div class="bc-text-container"><span class="bc-platform-label">Twitch</span><span class="bc-handle">${twitchHandle}</span></div></div></div>\n\t\t<div class="bc-pill youtube"><div class="bc-content"><div class="bc-icon-box">${YTB_SVG}</div><div class="bc-text-container"><span class="bc-platform-label">YouTube</span><span class="bc-handle">${youtubeHandle}</span></div></div></div>\n\t</div>\n</body>\n</html>`;
+        document.getElementById('code-output').textContent = code;
+        document.getElementById('line-count').textContent = code.split('\n').length+' lines';
+        return code;
+    }
+
+    function refresh(){updatePreview();generateCode();}
+
+    ['twitter','twitch','youtube'].forEach(p => {
+        document.getElementById(p+'-handle').addEventListener('input',function(){state[p+'Handle']=this.value;refresh();});
+        document.getElementById(p+'-color').addEventListener('input',function(){state[p+'Color']=this.value;refresh();});
+    });
+    document.getElementById('pos-top').addEventListener('input',function(){state.posTop=this.value;refresh();});
+    document.getElementById('pos-left').addEventListener('input',function(){state.posLeft=this.value;refresh();});
+
+    function changeBg(v){state.bgColor=v;document.getElementById('preview-area').style.backgroundColor=v;}
+    function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
+    function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
+    function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-social-pills.html'});a.click();URL.revokeObjectURL(a.href);}
+    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);document.getElementById('bg-select').value='#050508';changeBg('#050508');refresh();}
+
+    loadItem();
+</script>
+</body>
+</html>

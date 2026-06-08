@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Now Playing Plate — Osvato Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --osu-pink:#ff66aa; --osu-pink-dark:#cc4488; --dark-base:#121216; --dark-deeper:#0a0a0c; --panel-bg:#1c1c22; --panel-border:rgba(255,255,255,0.08); --text-main:#fff; --text-muted:#8888a0; --accent-green:#00e676; }
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{height:100%;margin:0;padding:0;background:var(--dark-base);color:var(--text-main);font-family:'Exo 2',sans-serif;overflow:hidden;}
+        header{background:var(--dark-deeper);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,102,170,0.15);height:64px;flex-shrink:0;}
+        .logo{font-weight:900;font-size:22px;text-decoration:none;color:white;letter-spacing:0.5px;}.logo span{color:var(--osu-pink);}
+        .page-title{font-size:14px;font-weight:800;color:white;}
+        .back-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 16px;border-radius:6px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+        .back-btn:hover{color:white;border-color:rgba(255,255,255,0.25);}
+        .page-body{display:flex;flex-direction:column;height:100vh;}
+        .editor-row{display:flex;flex:1;min-height:0;}
+        .left-panel{width:300px;flex-shrink:0;background:var(--dark-deeper);border-right:1px solid var(--panel-border);overflow-y:auto;overflow-x:hidden;}
+        .left-panel::-webkit-scrollbar{width:5px;}.left-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+        .section{padding:16px 20px;border-bottom:1px solid var(--panel-border);}
+        .section-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;}
+        .field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+        .field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .field input[type="text"]{width:100%;background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:8px 10px;border-radius:5px;font-family:'Exo 2';font-size:13px;font-weight:600;}
+        .field input[type="text"]:focus{outline:none;border-color:var(--osu-pink);}
+        .color-field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .color-field input[type="color"]{width:100%;height:34px;border-radius:5px;padding:2px 4px;background:var(--panel-bg);border:1px solid var(--panel-border);cursor:pointer;}
+        .map-block{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:6px;padding:12px;margin-bottom:8px;}
+        .map-block:last-child{margin-bottom:0;}
+        .map-block-header{font-size:10px;font-weight:800;color:var(--osu-pink);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;}
+        .image-drop{background:var(--panel-bg);border:1px dashed var(--panel-border);border-radius:6px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:10px;}
+        .image-drop:hover{border-color:rgba(255,255,255,0.2);}
+        .image-drop img{width:56px;height:56px;border-radius:8px;object-fit:cover;border:1px solid var(--panel-border);display:block;margin:0 auto 8px;}
+        .image-drop p{margin:0;font-size:11px;color:var(--text-muted);}.image-drop strong{display:block;color:white;font-size:12px;margin-bottom:2px;}
+        .image-drop input[type="file"]{display:none;}
+        .action-btn{width:100%;background:var(--osu-pink);color:white;border:none;padding:10px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;margin-bottom:8px;}
+        .action-btn:last-child{margin-bottom:0;}.action-btn:hover{background:var(--osu-pink-dark);}
+        .action-btn.secondary{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);font-weight:700;}
+        .action-btn.secondary:hover{color:#ff6b6b;border-color:rgba(255,80,80,0.4);background:transparent;}
+        .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+        .tabs{display:flex;background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:0 20px;flex-shrink:0;}
+        .tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:'Exo 2';border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+        .tab.active{color:white;border-bottom-color:var(--osu-pink);}.tab:hover:not(.active){color:rgba(255,255,255,0.6);}
+        .tab-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}.tab-pane.active{display:flex;}
+        .preview-area{flex:1;overflow:hidden;position:relative;background-color:#050508;background-image:radial-gradient(rgba(255,255,255,0.1) 1.5px,transparent 1.5px);background-size:20px 20px;animation:panBg 15s linear infinite;display:flex;align-items:flex-start;justify-content:flex-start;padding:30px;}
+        @keyframes panBg{from{background-position:0 0;}to{background-position:-40px -40px;}}
+        .preview-footer{background:var(--dark-deeper);border-top:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;flex-shrink:0;}
+        .preview-footer label{color:var(--text-muted);font-weight:700;}
+        .preview-footer select{background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:5px 8px;border-radius:4px;font-family:'Exo 2';font-size:12px;font-weight:600;}
+
+        /* NOW PLAYING PLATE */
+        .info-plate{position:relative;width:340px;background:rgba(10,10,14,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;box-shadow:0 20px 40px rgba(0,0,0,0.4);display:flex;gap:14px;align-items:center;overflow:hidden;}
+        .info-plate::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,#ff66aa);}
+        .map-jacket-wrap{width:64px;height:64px;flex-shrink:0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);}
+        .map-jacket{width:100%;height:100%;background:center/cover no-repeat;}
+        .map-meta{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+        .meta-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent,#ff66aa);margin-bottom:2px;}
+        .map-title{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
+        .map-artist{font-size:12px;font-weight:600;color:#a0a0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .map-mapper{font-size:11px;font-weight:400;color:#666680;margin-top:2px;}
+        .map-mapper span{color:#8888a8;font-weight:600;}
+        @keyframes slideIn{from{transform:translateX(-30px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+        .info-plate.animating{animation:slideIn 0.6s cubic-bezier(0.16,1,0.3,1) both;}
+
+        /* CODE */
+        .code-toolbar{background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .code-meta{display:flex;align-items:center;gap:10px;}
+        .lang-tag{background:rgba(255,102,170,0.1);border:1px solid rgba(255,102,170,0.2);color:var(--osu-pink);padding:3px 9px;border-radius:4px;font-size:11px;font-weight:800;}
+        .line-count{font-size:11px;color:var(--text-muted);font-weight:600;}
+        .code-actions{display:flex;gap:8px;}
+        .dl-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 14px;border-radius:5px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;}
+        .dl-btn:hover{border-color:rgba(255,255,255,0.2);color:white;}
+        .copy-code-btn{background:var(--osu-pink);color:white;border:none;padding:7px 16px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;}
+        .copy-code-btn:hover{background:var(--osu-pink-dark);}.copy-code-btn.copied{background:var(--accent-green);color:#000;}
+        .code-scroll{flex:1;overflow:auto;min-height:0;}
+        .code-scroll::-webkit-scrollbar{width:8px;height:8px;}.code-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+        .code-scroll pre{margin:0;padding:20px;color:#b4c7e7;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre;min-width:max-content;}
+    </style>
+</head>
+<body>
+<div class="page-body">
+    <header>
+        <a href="Osvato.html" class="logo"><span>Os</span>vato.</a>
+        <span class="page-title" id="page-title">Loading...</span>
+        <a href="Osvato.html" class="back-btn">← Back</a>
+    </header>
+    <div class="editor-row">
+        <aside class="left-panel">
+            <div class="section">
+                <div class="section-title">Accent Color</div>
+                <div class="color-field"><label>Highlight Color</label><input type="color" id="accent-color" value="#ff66aa"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Album Art</div>
+                <div class="image-drop" id="image-drop">
+                    <img id="preview-jacket" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150" alt="jacket">
+                    <strong>Click to upload</strong><p>browser preview only</p>
+                    <input type="file" id="jacket-file" accept="image/*">
+                </div>
+                <div class="field"><label>Image URL</label><input type="text" id="image-url" value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Map 1</div>
+                <div class="map-block">
+                    <div class="map-block-header">Slide 1</div>
+                    <div class="field"><label>Tag</label><input type="text" class="map-tag" data-idx="0" value="Now Playing"></div>
+                    <div class="field"><label>Title</label><input type="text" class="map-title-i" data-idx="0" value="IMAGE -MATERIAL-"></div>
+                    <div class="field"><label>Artist</label><input type="text" class="map-artist-i" data-idx="0" value="Tatsh"></div>
+                    <div class="field"><label>Mapper</label><input type="text" class="map-mapper-i" data-idx="0" value="Scorpiour"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Map 2</div>
+                <div class="map-block">
+                    <div class="map-block-header">Slide 2</div>
+                    <div class="field"><label>Tag</label><input type="text" class="map-tag" data-idx="1" value="Now Playing"></div>
+                    <div class="field"><label>Title</label><input type="text" class="map-title-i" data-idx="1" value="Harumachi Clover"></div>
+                    <div class="field"><label>Artist</label><input type="text" class="map-artist-i" data-idx="1" value="Swing Holic"></div>
+                    <div class="field"><label>Mapper</label><input type="text" class="map-mapper-i" data-idx="1" value="Sotarks"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Map 3</div>
+                <div class="map-block">
+                    <div class="map-block-header">Slide 3</div>
+                    <div class="field"><label>Tag</label><input type="text" class="map-tag" data-idx="2" value="Now Playing"></div>
+                    <div class="field"><label>Title</label><input type="text" class="map-title-i" data-idx="2" value="Freedom Dive"></div>
+                    <div class="field"><label>Artist</label><input type="text" class="map-artist-i" data-idx="2" value="xi"></div>
+                    <div class="field"><label>Mapper</label><input type="text" class="map-mapper-i" data-idx="2" value="Nakagawa-Kanon"></div>
+                </div>
+            </div>
+            <div class="section">
+                <button class="action-btn" onclick="copyCode()">Copy Code</button>
+                <button class="action-btn" onclick="downloadCode()">Download .html</button>
+                <button class="action-btn secondary" onclick="resetAll()">↺ Reset</button>
+            </div>
+        </aside>
+
+        <section class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview',this)">Live Preview</button>
+                <button class="tab" onclick="switchTab('code',this)">Code</button>
+            </div>
+            <div class="tab-pane active" id="tab-preview">
+                <div class="preview-area" id="preview-area">
+                    <div class="info-plate" id="info-plate" style="--accent:#ff66aa;">
+                        <div class="map-jacket-wrap"><div class="map-jacket" id="plate-jacket" style="background-image:url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150');"></div></div>
+                        <div class="map-meta">
+                            <div class="meta-tag" id="plate-tag">Now Playing</div>
+                            <div class="map-title" id="plate-title">IMAGE -MATERIAL-</div>
+                            <div class="map-artist" id="plate-artist">Tatsh</div>
+                            <div class="map-mapper">Mapped by <span id="plate-mapper">Scorpiour</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <label>Background:</label>
+                    <select id="bg-select" onchange="changeBg(this.value)">
+                        <option value="#050508">Dark (default)</option>
+                        <option value="#000000">Pure Black</option>
+                        <option value="#1a1a2e">Deep Blue</option>
+                        <option value="#2a1a2e">Purple</option>
+                    </select>
+                    <label style="margin-left:16px;">Preview Slide:</label>
+                    <select id="slide-select" onchange="setSlide(parseInt(this.value))">
+                        <option value="0">Slide 1</option>
+                        <option value="1">Slide 2</option>
+                        <option value="2">Slide 3</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-code">
+                <div class="code-toolbar">
+                    <div class="code-meta"><span class="lang-tag">HTML</span><span class="line-count" id="line-count"></span></div>
+                    <div class="code-actions">
+                        <button class="dl-btn" onclick="downloadCode()">Download .html</button>
+                        <button class="copy-code-btn" id="copy-code-btn" onclick="copyCode()">Copy Code</button>
+                    </div>
+                </div>
+                <div class="code-scroll"><pre id="code-output"></pre></div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    let ITEM = null;
+    const ITEM_ID = 3;
+    const state = {
+        accentColor:'#ff66aa',
+        imageUrl:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150',
+        bgColor:'#050508', currentSlide:0,
+        maps:[
+            {tag:'Now Playing',title:'IMAGE -MATERIAL-',artist:'Tatsh',mapper:'Scorpiour'},
+            {tag:'Now Playing',title:'Harumachi Clover',artist:'Swing Holic',mapper:'Sotarks'},
+            {tag:'Now Playing',title:'Freedom Dive',artist:'xi',mapper:'Nakagawa-Kanon'}
+        ]
+    };
+
+    async function loadItem() {
+        try {
+            const res = await fetch('Elements/Elements.json');
+            const data = await res.json();
+            ITEM = data.items.find(i => i.id === ITEM_ID);
+            if (ITEM) { document.getElementById('page-title').textContent = ITEM.title; applyDefaults(ITEM.defaults); }
+        } catch(e) { console.warn('Could not load Elements.json:', e); }
+        refresh();
+    }
+
+    function applyDefaults(d) {
+        state.accentColor = d.accentColor||'#ff66aa';
+        state.imageUrl = d.imageUrl||'';
+        state.maps = d.maps ? JSON.parse(JSON.stringify(d.maps)) : state.maps;
+        document.getElementById('accent-color').value = state.accentColor;
+        document.getElementById('image-url').value = state.imageUrl;
+        document.getElementById('preview-jacket').src = state.imageUrl;
+        state.maps.forEach((m,i) => {
+            const tag = document.querySelector(`.map-tag[data-idx="${i}"]`);
+            const title = document.querySelector(`.map-title-i[data-idx="${i}"]`);
+            const artist = document.querySelector(`.map-artist-i[data-idx="${i}"]`);
+            const mapper = document.querySelector(`.map-mapper-i[data-idx="${i}"]`);
+            if(tag) tag.value = m.tag;
+            if(title) title.value = m.title;
+            if(artist) artist.value = m.artist;
+            if(mapper) mapper.value = m.mapper;
+        });
+    }
+
+    function updatePreview() {
+        const m = state.maps[state.currentSlide];
+        document.getElementById('preview-area').style.backgroundColor = state.bgColor;
+        const plate = document.getElementById('info-plate');
+        plate.style.setProperty('--accent', state.accentColor);
+        document.getElementById('plate-jacket').style.backgroundImage = `url('${state.imageUrl}')`;
+        document.getElementById('plate-tag').textContent = m.tag;
+        document.getElementById('plate-tag').style.color = state.accentColor;
+        document.getElementById('plate-title').textContent = m.title;
+        document.getElementById('plate-artist').textContent = m.artist;
+        document.getElementById('plate-mapper').textContent = m.mapper;
+        plate.classList.remove('animating');
+        void plate.offsetWidth;
+        plate.classList.add('animating');
+    }
+
+    function setSlide(i) { state.currentSlide = i; updatePreview(); }
+
+    function generateCode() {
+        if (!ITEM) return '';
+        const {accentColor, imageUrl, maps} = state;
+        const mapsJSON = JSON.stringify(maps, null, 3).replace(/^/gm,'\t\t');
+        const code = `<!DOCTYPE html>\n<html lang="en">\n<head>\n\t<meta charset="UTF-8">\n\t<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800;900&display=swap" rel="stylesheet">\n\t<style>\n\t\t:root { --accent-glow: ${accentColor}; }\n\t\tbody { margin:0; padding:0; background:transparent; font-family:'Exo 2',sans-serif; color:#fff; }\n\t\t.info-plate { position:relative; width:340px; background:rgba(10,10,14,0.92); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; box-shadow:0 20px 40px rgba(0,0,0,0.4); display:flex; gap:14px; align-items:center; overflow:hidden; }\n\t\t.info-plate::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent-glow); }\n\t\t.map-jacket-wrap { width:64px; height:64px; flex-shrink:0; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.15); }\n\t\t/* Replace with your beatmap cover URL */\n\t\t.map-jacket { width:100%; height:100%; background:url('${imageUrl}') center/cover; }\n\t\t.map-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }\n\t\t.meta-tag { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent-glow); margin-bottom:2px; }\n\t\t.map-title { font-size:15px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; }\n\t\t.map-artist { font-size:12px; font-weight:600; color:#a0a0c0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }\n\t\t.map-mapper { font-size:11px; font-weight:400; color:#666680; margin-top:2px; }\n\t\t.map-mapper span { color:#8888a8; font-weight:600; }\n\t\t@keyframes slideIn { from{transform:translateX(-30px);opacity:0;} to{transform:translateX(0);opacity:1;} }\n\t\t.info-plate.animating { animation:slideIn 0.6s cubic-bezier(0.16,1,0.3,1) both; }\n\t</style>\n</head>\n<body>\n\t<div class="info-plate" id="plate">\n\t\t<div class="map-jacket-wrap"><div class="map-jacket"></div></div>\n\t\t<div class="map-meta">\n\t\t\t<div class="meta-tag" id="p-tag"></div>\n\t\t\t<div class="map-title" id="p-title"></div>\n\t\t\t<div class="map-artist" id="p-artist"></div>\n\t\t\t<div class="map-mapper">Mapped by <span id="p-mapper"></span></div>\n\t\t</div>\n\t</div>\n\t<script>\n\t\tconst maps = ${JSON.stringify(maps)};\n\t\tlet i = 0;\n\t\tfunction show(idx) { const m=maps[idx]; const p=document.getElementById('plate'); p.classList.remove('animating'); void p.offsetWidth; p.classList.add('animating'); document.getElementById('p-tag').textContent=m.tag; document.getElementById('p-title').textContent=m.title; document.getElementById('p-artist').textContent=m.artist; document.getElementById('p-mapper').textContent=m.mapper; }\n\t\tshow(0); setInterval(()=>{ i=(i+1)%maps.length; show(i); }, 5000);\n\t<\/script>\n</body>\n</html>`;
+        document.getElementById('code-output').textContent = code;
+        document.getElementById('line-count').textContent = code.split('\n').length+' lines';
+        return code;
+    }
+
+    function refresh(){updatePreview();generateCode();}
+
+    document.getElementById('accent-color').addEventListener('input',function(){state.accentColor=this.value;refresh();});
+    document.getElementById('image-url').addEventListener('input',function(){state.imageUrl=this.value;document.getElementById('preview-jacket').src=this.value;document.getElementById('plate-jacket').style.backgroundImage=`url('${this.value}')`;generateCode();});
+    document.querySelectorAll('.map-tag').forEach(el=>el.addEventListener('input',function(){state.maps[this.dataset.idx].tag=this.value;refresh();}));
+    document.querySelectorAll('.map-title-i').forEach(el=>el.addEventListener('input',function(){state.maps[this.dataset.idx].title=this.value;refresh();}));
+    document.querySelectorAll('.map-artist-i').forEach(el=>el.addEventListener('input',function(){state.maps[this.dataset.idx].artist=this.value;refresh();}));
+    document.querySelectorAll('.map-mapper-i').forEach(el=>el.addEventListener('input',function(){state.maps[this.dataset.idx].mapper=this.value;refresh();}));
+
+    document.getElementById('image-drop').addEventListener('click',()=>document.getElementById('jacket-file').click());
+    document.getElementById('jacket-file').addEventListener('change',function(){
+        if(!this.files[0])return;
+        const reader=new FileReader();
+        reader.onload=e=>{state.imageUrl=e.target.result;document.getElementById('preview-jacket').src=e.target.result;document.getElementById('plate-jacket').style.backgroundImage=`url('${e.target.result}')`;document.getElementById('image-url').value='(uploaded)';generateCode();};
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    function changeBg(v){state.bgColor=v;document.getElementById('preview-area').style.backgroundColor=v;}
+    function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
+    function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
+    function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-now-playing.html'});a.click();URL.revokeObjectURL(a.href);}
+    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);state.currentSlide=0;document.getElementById('slide-select').value=0;document.getElementById('bg-select').value='#050508';changeBg('#050508');refresh();}
+
+    loadItem();
+</script>
+</body>
+</html>
