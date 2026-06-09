@@ -242,7 +242,11 @@
         plate.classList.add('animating');
     }
 
-    function setSlide(i) { state.currentSlide = i; updatePreview(); }
+    function setSlide(i) {
+        state.currentSlide = i;
+        previewIdx = i;
+        updatePreview();
+    }
 
     function generateCode() {
         if (!ITEM) return '';
@@ -255,6 +259,42 @@
     }
 
     function refresh(){updatePreview();generateCode();}
+
+    // ── Cycle slides in preview ──
+    let previewIdx = 0;
+    function cyclePreview() {
+        const next = (previewIdx + 1) % state.maps.length;
+        const m = state.maps[next];
+        const plate = document.getElementById('info-plate');
+        plate.style.transition = 'opacity 0.3s, transform 0.3s';
+        plate.style.opacity = '0';
+        plate.style.transform = 'translateX(-16px)';
+        setTimeout(() => {
+            previewIdx = next;
+            document.getElementById('plate-tag').textContent    = m.tag;
+            document.getElementById('plate-tag').style.color    = state.accentColor;
+            document.getElementById('plate-title').textContent  = m.title;
+            document.getElementById('plate-artist').textContent = m.artist;
+            document.getElementById('plate-mapper').textContent = m.mapper;
+            plate.style.transform = 'translateX(16px)';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                plate.style.opacity = '1';
+                plate.style.transform = 'translateX(0)';
+            }));
+            // keep slide-select in sync
+            document.getElementById('slide-select').value = previewIdx;
+            state.currentSlide = previewIdx;
+        }, 300);
+    }
+    let cycleTimer = setInterval(cyclePreview, 4000);
+
+    // Manual slide select stops auto-cycle temporarily then resumes
+    document.getElementById('slide-select').addEventListener('change', function() {
+        clearInterval(cycleTimer);
+        setSlide(parseInt(this.value));
+        previewIdx = state.currentSlide;
+        cycleTimer = setInterval(cyclePreview, 4000);
+    });
 
     document.getElementById('accent-color').addEventListener('input',function(){state.accentColor=this.value;refresh();});
     document.getElementById('image-url').addEventListener('input',function(){state.imageUrl=this.value;document.getElementById('preview-jacket').src=this.value;document.getElementById('plate-jacket').style.backgroundImage=`url('${this.value}')`;generateCode();});
@@ -275,7 +315,15 @@
     function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
     function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
     function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-now-playing.html'});a.click();URL.revokeObjectURL(a.href);}
-    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);state.currentSlide=0;document.getElementById('slide-select').value=0;document.getElementById('bg-select').value='#050508';changeBg('#050508');refresh();}
+    function resetAll(){
+        if(ITEM)applyDefaults(ITEM.defaults);
+        previewIdx=0; state.currentSlide=0;
+        clearInterval(cycleTimer);
+        document.getElementById('bg-select').value='#050508';
+        changeBg('#050508');
+        refresh();
+        cycleTimer=setInterval(cyclePreview,4000);
+    }
 
     loadItem();
 </script>

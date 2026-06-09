@@ -83,7 +83,7 @@
         @keyframes miniFloat { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-80px) rotate(30deg); opacity: 0; } }
 
         /* Social pills */
-        .card-bc-anchor { position: relative; height: 44px; display: inline-flex; align-items: center; }
+        .card-bc-anchor { position: relative; width: 220px; height: 44px; flex-shrink: 0; }
         .card-bc-pill { position: absolute; left: 0; top: 0; height: 100%; background: #0a0a0c; border-radius: 22px; border: 2px solid rgba(255,255,255,0.06); display: flex; align-items: center; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: cardCycle 15s infinite ease-in-out; opacity: 0; width: 0; }
         .card-bc-pill.p-tw { animation-delay: 0s; } .card-bc-pill.p-tv { animation-delay: 5s; } .card-bc-pill.p-yt { animation-delay: 10s; }
         .card-bc-content { display: flex; align-items: center; width: 220px; height: 100%; padding-left: 6px; }
@@ -330,8 +330,9 @@ function renderCard(item, grid) {
 
     grid.appendChild(card);
 
-    // Quick color picker wiring (preview only, full edit in editor page)
     const d = item.defaults;
+
+    // ── Item 1: Watermark — color pickers update gradient ──
     if (item.id === 1) {
         const shapeEl = card.querySelector('.wm-shape');
         [1,2].forEach(n => {
@@ -343,7 +344,27 @@ function renderCard(item, grid) {
             });
         });
     }
+
+    // ── Item 2: Social pills — color pickers update icon bg + label color ──
+    if (item.id === 2) {
+        const map = { 1: 'tw', 2: 'tv', 3: 'yt' };
+        const platformLabel = { tw: 'Twitter', tv: 'Twitch', yt: 'YouTube' };
+        [1,2,3].forEach(n => {
+            const inp = document.getElementById(`c${n}-${item.id}`);
+            const key = map[n];
+            if (!inp || !key) return;
+            inp.addEventListener('input', function() {
+                const icon = card.querySelector(`.card-bc-pill.p-${key} .card-bc-icon`);
+                const label = card.querySelector(`.card-bc-pill.p-${key} .card-bc-label`);
+                if (icon) { icon.style.background = this.value; icon.style.boxShadow = `0 0 8px ${this.value}`; }
+                if (label) label.style.color = this.value;
+            });
+        });
+    }
+
+    // ── Item 3: Now Playing — color picker + cycling animation ──
     if (item.id === 3) {
+        // Color picker
         const inp = document.getElementById(`c1-${item.id}`);
         if (inp) inp.addEventListener('input', function() {
             const plate = card.querySelector('.card-plate');
@@ -351,7 +372,46 @@ function renderCard(item, grid) {
             if (plate) plate.style.setProperty('--card-accent', this.value);
             if (tag) tag.style.color = this.value;
         });
+
+        // Cycle maps every 4s with slide-in animation
+        const maps = (d.maps && d.maps.length) ? d.maps : [
+            { tag:'Now Playing', title:'IMAGE -MATERIAL-', artist:'Tatsh', mapper:'Scorpiour' },
+            { tag:'Now Playing', title:'Harumachi Clover', artist:'Swing Holic', mapper:'Sotarks' },
+            { tag:'Now Playing', title:'Freedom Dive', artist:'xi', mapper:'Nakagawa-Kanon' }
+        ];
+        let mapIdx = 0;
+        const plateEl = card.querySelector('.card-plate');
+        const tagEl   = card.querySelector('.card-plate-tag');
+        const titleEl = card.querySelector('.card-plate-title');
+        const artistEl = card.querySelector('.card-plate-artist');
+        const mapperEl = card.querySelector('.card-plate-mapper span');
+
+        function showMap(idx) {
+            const m = maps[idx];
+            if (!plateEl) return;
+            plateEl.style.transition = 'opacity 0.3s, transform 0.3s';
+            plateEl.style.opacity = '0';
+            plateEl.style.transform = 'translateX(-16px)';
+            setTimeout(() => {
+                if (tagEl)    tagEl.textContent   = m.tag;
+                if (titleEl)  titleEl.textContent  = m.title;
+                if (artistEl) artistEl.textContent = m.artist;
+                if (mapperEl) mapperEl.textContent = m.mapper;
+                plateEl.style.transform = 'translateX(16px)';
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    plateEl.style.opacity = '1';
+                    plateEl.style.transform = 'translateX(0)';
+                }));
+            }, 300);
+        }
+
+        setInterval(() => {
+            mapIdx = (mapIdx + 1) % maps.length;
+            showMap(mapIdx);
+        }, 4000);
     }
+
+    // ── Item 4: Neon frame — color picker ──
     if (item.id === 4) {
         const inp = document.getElementById(`c1-${item.id}`);
         if (inp) inp.addEventListener('input', function() {
@@ -362,7 +422,7 @@ function renderCard(item, grid) {
         });
     }
 
-    // Slider
+    // ── Slider (preview ↔ code) ──
     let isCode = false;
     const track = document.getElementById(`track-${cid}`);
     const ind = document.getElementById(`ind-${cid}`);
@@ -371,7 +431,7 @@ function renderCard(item, grid) {
     document.getElementById(`prev-${cid}`).addEventListener('click', toggle);
     document.getElementById(`next-${cid}`).addEventListener('click', toggle);
 
-    // Purchase
+    // ── Purchase ──
     const btn = document.getElementById(`btn-${cid}`);
     btn.addEventListener('click', () => {
         btn.classList.add('loading'); btn.innerHTML='Processing...';
@@ -383,7 +443,7 @@ function renderCard(item, grid) {
         }, 800);
     });
 
-    // Copy (stub — full code comes from editor)
+    // ── Copy (redirects to editor since code is generated there) ──
     document.getElementById(`copybtn-${cid}`).addEventListener('click', function() {
         const text = document.getElementById(`code-${cid}`).textContent;
         if (text.startsWith('Open')) { window.location.href = item.editorPage; return; }
@@ -392,6 +452,8 @@ function renderCard(item, grid) {
             setTimeout(() => { this.innerText='Copy'; this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'; }, 2000);
         });
     });
+}
+
 }
 
 loadElements();
