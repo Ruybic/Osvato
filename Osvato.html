@@ -144,6 +144,16 @@
         .card-ev-type { font-weight:900; color:#7e7e8a; font-size:9px; }
         .card-ev-user { font-weight:900; color:#fff; }
 
+        /* Ledger flashbang on card */
+        .card-ledger-flash-active { animation: cardFlashbang 1.2s cubic-bezier(0.16,1,0.3,1) both; }
+        @keyframes cardFlashbang {
+            0%   { background: #ffffff !important; color: #000 !important; box-shadow: 0 0 20px rgba(255,255,255,0.7); }
+            15%  { background: #ffffff !important; color: #000 !important; box-shadow: 0 0 30px rgba(255,255,255,0.9); }
+            100% { background: inherit; color: inherit; box-shadow: none; }
+        }
+        .card-ledger-flash-active .card-ev-type,
+        .card-ledger-flash-active .card-ev-user { color: #000 !important; }
+
         /* HUD brackets */
         .card-hud-frame { position:relative; width:200px; height:130px; background:rgba(255,255,255,0.01); }
         .card-bracket { position:absolute; width:16px; height:16px; animation:bracketCard 5s infinite ease-in-out; }
@@ -359,38 +369,6 @@ function buildSettings(item) {
             return `<div class="settings-box">
                 <div class="color-wrap"><label>Frame</label><input type="color" id="c1-${item.id}" value="${d.frameColor}"></div>
             </div>`;
-        case 5: {
-            const pct = Math.min(100, Math.max(0, Math.round(((d.currentValue||74)/(d.targetValue||100))*100)));
-            return `<div class="card-goal" id="card-goal-${item.id}">
-                <div class="card-goal-header">
-                    <span class="card-goal-title">${d.label||'Goal'}</span>
-                    <span class="card-goal-values"><span class="val">${d.currentValue||74}</span> / ${d.targetValue||100} ${d.unit||'PP'}</span>
-                </div>
-                <div class="card-goal-track">
-                    <div class="card-goal-fill" id="card-goal-fill-${item.id}" style="width:${pct}%;background:linear-gradient(90deg,#16161f,${d.accentColor||'#0391e2'});box-shadow:2px 0 10px ${d.accentColor||'#0391e2'};"></div>
-                </div>
-            </div>`; }
-        case 6:
-            return `<div class="card-chat">
-                <div class="card-chat-hdr">
-                    <div class="card-chat-icon"></div>
-                    <span class="card-chat-label">${d.headerLabel||'Live Chat'}</span>
-                </div>
-                <div class="card-chat-body">
-                    ${(d.messages||[]).slice(0,2).map(m=>`<div class="card-msg"><span class="card-msg-user">${m.user}</span><span class="card-msg-text">${m.text}</span></div>`).join('')}
-                </div>
-            </div>`;
-        case 7:
-            return `<div class="card-ledger">
-                ${(d.events||[]).map(e=>`<div class="card-ledger-row"><span class="card-ev-type">${e.type}</span><span class="card-ev-user">${e.user}</span></div>`).join('')}
-            </div>`;
-        case 8:
-            return `<div class="card-hud-frame">
-                <div class="card-bracket tl"></div>
-                <div class="card-bracket tr"></div>
-                <div class="card-bracket bl"></div>
-                <div class="card-bracket br"></div>
-            </div>`;
         case 5:
             return `<div class="settings-box">
                 <div class="color-wrap"><label>Accent</label><input type="color" id="c1-${item.id}" value="${d.accentColor||'#0391e2'}"></div>
@@ -566,19 +544,43 @@ function renderCard(item, grid) {
         });
     }
 
-    // ── Item 7: Alerts ledger — bg + text color ──
+    // ── Item 7: Alerts ledger — bg + text color + live cycling ──
     if (item.id === 7) {
         const inp1 = document.getElementById(`c1-${item.id}`);
         const inp2 = document.getElementById(`c2-${item.id}`);
         if (inp1) inp1.addEventListener('input', function() {
-            const ledger = card.querySelector('.card-ledger');
+            const ledgerEl = card.querySelector('.card-ledger');
             const rows = card.querySelectorAll('.card-ledger-row');
-            if (ledger) ledger.style.background = this.value;
+            if (ledgerEl) ledgerEl.style.background = this.value;
             rows.forEach(r => r.style.background = this.value);
         });
         if (inp2) inp2.addEventListener('input', function() {
             card.querySelectorAll('.card-ev-user').forEach(u => u.style.color = this.value);
         });
+
+        // Live cycling — inserts a new row at top every 4s with flashbang
+        const feed = (d.mockFeed && d.mockFeed.length) ? d.mockFeed : [
+            { type:'Donation', user:'RhythmMaster ($20.00)' },
+            { type:'Latest Sub', user:'Heaven501' },
+            { type:'Follower', user:'Zero_G_Player' },
+            { type:'Resub x12', user:'Matrix_Core' }
+        ];
+        let feedIdx = 0;
+        const ledgerEl = card.querySelector('.card-ledger');
+        setInterval(() => {
+            if (!ledgerEl) return;
+            if (ledgerEl.children.length >= 4) ledgerEl.removeChild(ledgerEl.lastElementChild);
+            const e = feed[feedIdx % feed.length];
+            feedIdx++;
+            const r = document.createElement('div');
+            r.className = 'card-ledger-row card-ledger-flash';
+            r.style.background = inp1 ? inp1.value : d.bgSolid || '#0b0b0f';
+            r.innerHTML = `<span class="card-ev-type">${e.type}</span><span class="card-ev-user" style="color:${inp2 ? inp2.value : '#fff'}">${e.user}</span>`;
+            ledgerEl.insertBefore(r, ledgerEl.firstChild);
+            // trigger reflow for animation restart
+            void r.offsetWidth;
+            r.classList.add('card-ledger-flash-active');
+        }, 4000);
     }
 
     // ── Item 8: HUD brackets — color ──
@@ -623,6 +625,8 @@ function renderCard(item, grid) {
             setTimeout(() => { this.innerText='Copy'; this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'; }, 2000);
         });
     });
+}
+
 }
 
 loadElements();
