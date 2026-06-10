@@ -145,14 +145,11 @@
         .card-ev-user { font-weight:900; color:#fff; }
 
         /* Ledger flashbang on card */
-        .card-ledger-flash-active { animation: cardFlashbang 1.2s cubic-bezier(0.16,1,0.3,1) both; }
+        .card-ledger-flash-active { animation: cardFlashbang 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
         @keyframes cardFlashbang {
-            0%   { background: #ffffff !important; color: #000 !important; box-shadow: 0 0 20px rgba(255,255,255,0.7); }
-            15%  { background: #ffffff !important; color: #000 !important; box-shadow: 0 0 30px rgba(255,255,255,0.9); }
-            100% { background: inherit; color: inherit; box-shadow: none; }
+            0%   { filter: brightness(10); }
+            100% { filter: brightness(1); }
         }
-        .card-ledger-flash-active .card-ev-type,
-        .card-ledger-flash-active .card-ev-user { color: #000 !important; }
 
         /* HUD brackets */
         .card-hud-frame { position:relative; width:200px; height:130px; background:rgba(255,255,255,0.01); }
@@ -572,12 +569,14 @@ function renderCard(item, grid) {
             if (ledgerEl.children.length >= 4) ledgerEl.removeChild(ledgerEl.lastElementChild);
             const e = feed[feedIdx % feed.length];
             feedIdx++;
+            const bgVal = inp1 ? inp1.value : (d.bgSolid || '#0b0b0f');
+            const textVal = inp2 ? inp2.value : '#ffffff';
             const r = document.createElement('div');
-            r.className = 'card-ledger-row card-ledger-flash';
-            r.style.background = inp1 ? inp1.value : d.bgSolid || '#0b0b0f';
-            r.innerHTML = `<span class="card-ev-type">${e.type}</span><span class="card-ev-user" style="color:${inp2 ? inp2.value : '#fff'}">${e.user}</span>`;
+            r.className = 'card-ledger-row';
+            r.style.cssText = `background:${bgVal}; color:${textVal};`;
+            r.innerHTML = `<span class="card-ev-type">${e.type}</span><span class="card-ev-user" style="color:${textVal}">${e.user}</span>`;
             ledgerEl.insertBefore(r, ledgerEl.firstChild);
-            // trigger reflow for animation restart
+            // trigger reflow then apply animation
             void r.offsetWidth;
             r.classList.add('card-ledger-flash-active');
         }, 4000);
@@ -625,6 +624,8 @@ function renderCard(item, grid) {
             setTimeout(() => { this.innerText='Copy'; this.style.background='rgba(255,255,255,0.1)'; this.style.color='white'; }, 2000);
         });
     });
+}
+
 }
 
 loadElements();
