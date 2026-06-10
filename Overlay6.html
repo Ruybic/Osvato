@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat Module — Osvato Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --osu-pink:#ff66aa; --osu-pink-dark:#cc4488; --dark-base:#121216; --dark-deeper:#0a0a0c; --panel-bg:#1c1c22; --panel-border:rgba(255,255,255,0.08); --text-main:#fff; --text-muted:#8888a0; --accent-green:#00e676; }
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{height:100%;margin:0;padding:0;background:var(--dark-base);color:var(--text-main);font-family:'Exo 2',sans-serif;overflow:hidden;}
+        header{background:var(--dark-deeper);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,102,170,0.15);height:64px;flex-shrink:0;}
+        .logo{font-weight:900;font-size:22px;text-decoration:none;color:white;letter-spacing:0.5px;}.logo span{color:var(--osu-pink);}
+        .page-title{font-size:14px;font-weight:800;color:white;}
+        .back-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 16px;border-radius:6px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+        .back-btn:hover{color:white;border-color:rgba(255,255,255,0.25);}
+        .page-body{display:flex;flex-direction:column;height:100vh;}
+        .editor-row{display:flex;flex:1;min-height:0;}
+        .left-panel{width:300px;flex-shrink:0;background:var(--dark-deeper);border-right:1px solid var(--panel-border);overflow-y:auto;overflow-x:hidden;}
+        .left-panel::-webkit-scrollbar{width:5px;}.left-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+        .section{padding:16px 20px;border-bottom:1px solid var(--panel-border);}
+        .section-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;}
+        .field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+        .field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .field input[type="text"],.field input[type="number"]{width:100%;background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:8px 10px;border-radius:5px;font-family:'Exo 2';font-size:13px;font-weight:600;}
+        .field input:focus{outline:none;border-color:var(--osu-pink);}
+        .color-field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .color-field input[type="color"]{width:100%;height:34px;border-radius:5px;padding:2px 4px;background:var(--panel-bg);border:1px solid var(--panel-border);cursor:pointer;}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .msg-block{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:6px;padding:12px;margin-bottom:8px;}
+        .msg-block:last-child{margin-bottom:0;}
+        .msg-block-hdr{font-size:10px;font-weight:800;color:var(--osu-pink);margin-bottom:8px;text-transform:uppercase;}
+        .action-btn{width:100%;background:var(--osu-pink);color:white;border:none;padding:10px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;margin-bottom:8px;}
+        .action-btn:last-child{margin-bottom:0;}.action-btn:hover{background:var(--osu-pink-dark);}
+        .action-btn.secondary{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);font-weight:700;}
+        .action-btn.secondary:hover{color:#ff6b6b;border-color:rgba(255,80,80,0.4);background:transparent;}
+        .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+        .tabs{display:flex;background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:0 20px;flex-shrink:0;}
+        .tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:'Exo 2';border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+        .tab.active{color:white;border-bottom-color:var(--osu-pink);}.tab:hover:not(.active){color:rgba(255,255,255,0.6);}
+        .tab-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}.tab-pane.active{display:flex;}
+        .preview-area{flex:1;overflow:hidden;position:relative;background-color:#050508;background-image:radial-gradient(rgba(255,255,255,0.1) 1.5px,transparent 1.5px);background-size:20px 20px;animation:panBg 15s linear infinite;display:flex;align-items:center;justify-content:center;}
+        @keyframes panBg{from{background-position:0 0;}to{background-position:-40px -40px;}}
+        .preview-footer{background:var(--dark-deeper);border-top:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;flex-shrink:0;}
+        .preview-footer label{color:var(--text-muted);font-weight:700;}
+        .preview-footer select{background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:5px 8px;border-radius:4px;font-family:'Exo 2';font-size:12px;font-weight:600;}
+
+        /* CHAT COMPONENT */
+        .chat-module-container{display:flex;flex-direction:column;background:#060608;border:1px solid rgba(255,255,255,0.03);border-radius:6px;box-shadow:0 30px 60px rgba(0,0,0,0.8);position:relative;overflow:hidden;}
+        .chat-header{width:100%;background:#0b0b0f;padding:14px 20px;display:flex;align-items:center;gap:12px;position:relative;z-index:2;flex-shrink:0;}
+        .chat-header::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(255,255,255,0.08);}
+        .chat-header::after{content:'';position:absolute;bottom:-0.5px;left:0;width:70px;height:1px;background:var(--neon-c,#fff);box-shadow:0 0 4px #fff,0 0 12px rgba(255,255,255,0.8),0 0 25px rgba(255,255,255,0.4);z-index:3;animation:razorSweep 3s infinite alternate cubic-bezier(0.4,0,0.2,1);}
+        .header-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-left:2px solid var(--neon-c,#fff);padding-left:4px;}
+        .header-icon svg{width:13px;height:13px;fill:var(--neon-c,#fff);}
+        .header-text{color:var(--neon-c,#fff);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:2.5px;}
+        .chat-body-view{flex:1;width:100%;padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden;}
+        .msg-row{font-size:13px;line-height:1.4;}
+        .msg-user{font-weight:900;color:#fff;opacity:0.9;margin-right:6px;}
+        .msg-text{font-weight:400;color:#7e7e8a;}
+        @keyframes razorSweep{0%{left:0%;transform:translateX(0%);}100%{left:100%;transform:translateX(-100%);}}
+
+        /* CODE */
+        .code-toolbar{background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .code-meta{display:flex;align-items:center;gap:10px;}
+        .lang-tag{background:rgba(255,102,170,0.1);border:1px solid rgba(255,102,170,0.2);color:var(--osu-pink);padding:3px 9px;border-radius:4px;font-size:11px;font-weight:800;}
+        .line-count{font-size:11px;color:var(--text-muted);font-weight:600;}
+        .code-actions{display:flex;gap:8px;}
+        .dl-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 14px;border-radius:5px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;}
+        .dl-btn:hover{border-color:rgba(255,255,255,0.2);color:white;}
+        .copy-code-btn{background:var(--osu-pink);color:white;border:none;padding:7px 16px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;}
+        .copy-code-btn:hover{background:var(--osu-pink-dark);}.copy-code-btn.copied{background:var(--accent-green);color:#000;}
+        .code-scroll{flex:1;overflow:auto;min-height:0;}
+        .code-scroll::-webkit-scrollbar{width:8px;height:8px;}.code-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+        .code-scroll pre{margin:0;padding:20px;color:#b4c7e7;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre;min-width:max-content;}
+    </style>
+</head>
+<body>
+<div class="page-body">
+    <header>
+        <a href="Osvato.html" class="logo"><span>Os</span>vato.</a>
+        <span class="page-title" id="page-title">Live Chat Module</span>
+        <a href="Osvato.html" class="back-btn">← Back</a>
+    </header>
+    <div class="editor-row">
+        <aside class="left-panel">
+            <div class="section">
+                <div class="section-title">Appearance</div>
+                <div class="color-field" style="margin-bottom:10px;"><label>Neon Color</label><input type="color" id="neon-color" value="#ffffff"></div>
+                <div class="color-field" style="margin-bottom:10px;"><label>Header Background</label><input type="color" id="header-bg" value="#0b0b0f"></div>
+                <div class="color-field"><label>Body Background</label><input type="color" id="body-bg" value="#060608"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Header</div>
+                <div class="field"><label>Label</label><input type="text" id="header-label" value="Live Chat"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Dimensions</div>
+                <div class="two-col">
+                    <div class="field"><label>Width (px)</label><input type="number" id="cont-w" value="360" min="200" max="600"></div>
+                    <div class="field"><label>Height (px)</label><input type="number" id="cont-h" value="480" min="200" max="800"></div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Sample Messages</div>
+                <div class="msg-block">
+                    <div class="msg-block-hdr">Message 1</div>
+                    <div class="field"><label>User</label><input type="text" class="msg-user-inp" data-idx="0" value="Heaven501"></div>
+                    <div class="field"><label>Text</label><input type="text" class="msg-text-inp" data-idx="0" value="The multi-layered shadow makes the white laser look incredibly intense now."></div>
+                </div>
+                <div class="msg-block">
+                    <div class="msg-block-hdr">Message 2</div>
+                    <div class="field"><label>User</label><input type="text" class="msg-user-inp" data-idx="1" value="Scorpiour"></div>
+                    <div class="field"><label>Text</label><input type="text" class="msg-text-inp" data-idx="1" value="Perfect. It completely feels like a real production overlay."></div>
+                </div>
+            </div>
+            <div class="section">
+                <button class="action-btn" onclick="copyCode()">Copy Code</button>
+                <button class="action-btn" onclick="downloadCode()">Download .html</button>
+                <button class="action-btn secondary" onclick="resetAll()">↺ Reset</button>
+            </div>
+        </aside>
+        <section class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview',this)">Live Preview</button>
+                <button class="tab" onclick="switchTab('code',this)">Code</button>
+            </div>
+            <div class="tab-pane active" id="tab-preview">
+                <div class="preview-area" id="preview-area">
+                    <div class="chat-module-container" id="chat-root" style="width:360px;height:480px;--neon-c:#ffffff;">
+                        <div class="chat-header" id="chat-header">
+                            <div class="header-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></div>
+                            <span class="header-text" id="prev-header-label">Live Chat</span>
+                        </div>
+                        <div class="chat-body-view" id="prev-chat-body">
+                            <div class="msg-row"><span class="msg-user">Heaven501</span><span class="msg-text">The multi-layered shadow makes the white laser look incredibly intense now.</span></div>
+                            <div class="msg-row"><span class="msg-user">Scorpiour</span><span class="msg-text">Perfect. It completely feels like a real production overlay.</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <label>Background:</label>
+                    <select id="bg-select" onchange="changeBg(this.value)">
+                        <option value="#050508">Dark (default)</option>
+                        <option value="#000000">Pure Black</option>
+                        <option value="#1a1a2e">Deep Blue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-code">
+                <div class="code-toolbar">
+                    <div class="code-meta"><span class="lang-tag">HTML</span><span class="line-count" id="line-count"></span></div>
+                    <div class="code-actions">
+                        <button class="dl-btn" onclick="downloadCode()">Download .html</button>
+                        <button class="copy-code-btn" id="copy-code-btn" onclick="copyCode()">Copy Code</button>
+                    </div>
+                </div>
+                <div class="code-scroll"><pre id="code-output"></pre></div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    let ITEM = null;
+    const ITEM_ID = 6;
+    const state = { neonColor:'#ffffff', headerBg:'#0b0b0f', bodyBg:'#060608', headerLabel:'Live Chat', containerWidth:360, containerHeight:480, bgColor:'#050508', messages:[{user:'Heaven501',text:'The multi-layered shadow makes the white laser look incredibly intense now.'},{user:'Scorpiour',text:'Perfect. It completely feels like a real production overlay.'}] };
+
+    async function loadItem() {
+        try {
+            const res = await fetch('Elements/Elements.json');
+            const data = await res.json();
+            ITEM = data.items.find(i => i.id === ITEM_ID);
+            if (ITEM) { document.getElementById('page-title').textContent = ITEM.title; applyDefaults(ITEM.defaults); }
+        } catch(e) { console.warn('Could not load Elements.json:', e); }
+        refresh();
+    }
+
+    function applyDefaults(d) {
+        state.neonColor = d.neonColor||'#ffffff'; document.getElementById('neon-color').value = state.neonColor;
+        state.headerBg = d.headerBg||'#0b0b0f'; document.getElementById('header-bg').value = state.headerBg;
+        state.bodyBg = d.bgSolid||'#060608'; document.getElementById('body-bg').value = state.bodyBg;
+        state.headerLabel = d.headerLabel||'Live Chat'; document.getElementById('header-label').value = state.headerLabel;
+        state.containerWidth = d.containerWidth||360; document.getElementById('cont-w').value = state.containerWidth;
+        state.containerHeight = d.containerHeight||480; document.getElementById('cont-h').value = state.containerHeight;
+        if (d.messages) {
+            state.messages = d.messages.slice(0,2);
+            document.querySelectorAll('.msg-user-inp').forEach(el=>{ if(state.messages[el.dataset.idx]) el.value=state.messages[el.dataset.idx].user; });
+            document.querySelectorAll('.msg-text-inp').forEach(el=>{ if(state.messages[el.dataset.idx]) el.value=state.messages[el.dataset.idx].text; });
+        }
+    }
+
+    function updatePreview() {
+        const root = document.getElementById('chat-root');
+        root.style.width = state.containerWidth+'px';
+        root.style.height = state.containerHeight+'px';
+        root.style.background = state.bodyBg;
+        root.style.setProperty('--neon-c', state.neonColor);
+        document.getElementById('chat-header').style.background = state.headerBg;
+        document.getElementById('prev-header-label').textContent = state.headerLabel;
+        const body = document.getElementById('prev-chat-body');
+        body.innerHTML = '';
+        state.messages.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'msg-row';
+            row.innerHTML = `<span class="msg-user">${m.user}</span><span class="msg-text">${m.text}</span>`;
+            body.appendChild(row);
+        });
+        document.getElementById('preview-area').style.backgroundColor = state.bgColor;
+    }
+
+    function generateCode() {
+        if (!ITEM) return '';
+        const {neonColor,headerBg,bodyBg,headerLabel,containerWidth,containerHeight,messages} = state;
+        const messagesJSON = JSON.stringify(messages);
+        let code = ITEM.code
+            .replace(/\{\{neonColor\}\}/g, neonColor)
+            .replace(/\{\{headerBg\}\}/g, headerBg)
+            .replace(/\{\{bgSolid\}\}/g, bodyBg)
+            .replace(/\{\{headerLabel\}\}/g, headerLabel)
+            .replace(/\{\{containerWidth\}\}/g, containerWidth)
+            .replace(/\{\{containerHeight\}\}/g, containerHeight)
+            .replace(/\{\{messagesJSON\}\}/g, messagesJSON);
+        document.getElementById('code-output').textContent = code;
+        document.getElementById('line-count').textContent = code.split('\n').length + ' lines';
+        return code;
+    }
+
+    function refresh(){updatePreview();generateCode();}
+
+    document.getElementById('neon-color').addEventListener('input',function(){state.neonColor=this.value;refresh();});
+    document.getElementById('header-bg').addEventListener('input',function(){state.headerBg=this.value;refresh();});
+    document.getElementById('body-bg').addEventListener('input',function(){state.bodyBg=this.value;refresh();});
+    document.getElementById('header-label').addEventListener('input',function(){state.headerLabel=this.value;refresh();});
+    document.getElementById('cont-w').addEventListener('input',function(){state.containerWidth=parseInt(this.value)||360;refresh();});
+    document.getElementById('cont-h').addEventListener('input',function(){state.containerHeight=parseInt(this.value)||480;refresh();});
+    document.querySelectorAll('.msg-user-inp').forEach(el=>el.addEventListener('input',function(){if(!state.messages[this.dataset.idx])state.messages[this.dataset.idx]={user:'',text:''};state.messages[this.dataset.idx].user=this.value;refresh();}));
+    document.querySelectorAll('.msg-text-inp').forEach(el=>el.addEventListener('input',function(){if(!state.messages[this.dataset.idx])state.messages[this.dataset.idx]={user:'',text:''};state.messages[this.dataset.idx].text=this.value;refresh();}));
+
+    function changeBg(v){state.bgColor=v;document.getElementById('preview-area').style.backgroundColor=v;}
+    function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
+    function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
+    function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-live-chat.html'});a.click();URL.revokeObjectURL(a.href);}
+    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);document.getElementById('bg-select').value='#050508';changeBg('#050508');refresh();}
+
+    loadItem();
+</script>
+</body>
+</html>

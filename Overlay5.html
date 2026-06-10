@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Progress Bar — Osvato Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --osu-pink:#ff66aa; --osu-pink-dark:#cc4488; --dark-base:#121216; --dark-deeper:#0a0a0c; --panel-bg:#1c1c22; --panel-border:rgba(255,255,255,0.08); --text-main:#fff; --text-muted:#8888a0; --accent-green:#00e676; }
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{height:100%;margin:0;padding:0;background:var(--dark-base);color:var(--text-main);font-family:'Exo 2',sans-serif;overflow:hidden;}
+        header{background:var(--dark-deeper);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,102,170,0.15);height:64px;flex-shrink:0;}
+        .logo{font-weight:900;font-size:22px;text-decoration:none;color:white;letter-spacing:0.5px;}.logo span{color:var(--osu-pink);}
+        .page-title{font-size:14px;font-weight:800;color:white;}
+        .back-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 16px;border-radius:6px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+        .back-btn:hover{color:white;border-color:rgba(255,255,255,0.25);}
+        .page-body{display:flex;flex-direction:column;height:100vh;}
+        .editor-row{display:flex;flex:1;min-height:0;}
+        .left-panel{width:300px;flex-shrink:0;background:var(--dark-deeper);border-right:1px solid var(--panel-border);overflow-y:auto;overflow-x:hidden;}
+        .left-panel::-webkit-scrollbar{width:5px;}.left-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+        .section{padding:16px 20px;border-bottom:1px solid var(--panel-border);}
+        .section-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;}
+        .field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+        .field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .field input[type="text"],.field input[type="number"]{width:100%;background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:8px 10px;border-radius:5px;font-family:'Exo 2';font-size:13px;font-weight:600;}
+        .field input:focus{outline:none;border-color:var(--osu-pink);}
+        .color-field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .color-field input[type="color"]{width:100%;height:34px;border-radius:5px;padding:2px 4px;background:var(--panel-bg);border:1px solid var(--panel-border);cursor:pointer;}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .action-btn{width:100%;background:var(--osu-pink);color:white;border:none;padding:10px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;margin-bottom:8px;}
+        .action-btn:last-child{margin-bottom:0;}.action-btn:hover{background:var(--osu-pink-dark);}
+        .action-btn.secondary{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);font-weight:700;}
+        .action-btn.secondary:hover{color:#ff6b6b;border-color:rgba(255,80,80,0.4);background:transparent;}
+        .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+        .tabs{display:flex;background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:0 20px;flex-shrink:0;}
+        .tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:'Exo 2';border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+        .tab.active{color:white;border-bottom-color:var(--osu-pink);}.tab:hover:not(.active){color:rgba(255,255,255,0.6);}
+        .tab-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}.tab-pane.active{display:flex;}
+        .preview-area{flex:1;overflow:hidden;position:relative;background-color:#050508;background-image:radial-gradient(rgba(255,255,255,0.1) 1.5px,transparent 1.5px);background-size:20px 20px;animation:panBg 15s linear infinite;display:flex;align-items:flex-start;justify-content:flex-start;padding:30px;}
+        @keyframes panBg{from{background-position:0 0;}to{background-position:-40px -40px;}}
+        .preview-footer{background:var(--dark-deeper);border-top:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;flex-shrink:0;}
+        .preview-footer label{color:var(--text-muted);font-weight:700;}
+        .preview-footer select{background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:5px 8px;border-radius:4px;font-family:'Exo 2';font-size:12px;font-weight:600;}
+
+        /* GOAL BAR COMPONENT */
+        .goal-container{width:380px;display:flex;flex-direction:column;gap:6px;}
+        .goal-header{display:flex;justify-content:space-between;align-items:flex-end;padding:0 4px;}
+        .goal-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#8888a0;}
+        .goal-values{font-size:13px;font-weight:900;color:#fff;}
+        .goal-values span{color:var(--goal-accent,#0391e2);}
+        .goal-track{height:16px;background:#16161f;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);position:relative;transform:skewX(-15deg);}
+        .goal-fill{height:100%;background:linear-gradient(90deg,#16161f,var(--goal-accent,#0391e2));position:relative;border-radius:2px;box-shadow:3px 0 12px var(--goal-accent,#0391e2);}
+        .goal-fill::after{content:'';position:absolute;top:0;bottom:0;left:0;right:0;background-image:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.4) 50%,rgba(255,255,255,0) 100%);background-size:40px 100%;background-repeat:no-repeat;animation:warpDrive 1.8s infinite linear;}
+        @keyframes warpDrive{0%{background-position:-40px 0;}100%{background-position:calc(100% + 40px) 0;}}
+
+        /* CODE */
+        .code-toolbar{background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .code-meta{display:flex;align-items:center;gap:10px;}
+        .lang-tag{background:rgba(255,102,170,0.1);border:1px solid rgba(255,102,170,0.2);color:var(--osu-pink);padding:3px 9px;border-radius:4px;font-size:11px;font-weight:800;}
+        .line-count{font-size:11px;color:var(--text-muted);font-weight:600;}
+        .code-actions{display:flex;gap:8px;}
+        .dl-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 14px;border-radius:5px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;}
+        .dl-btn:hover{border-color:rgba(255,255,255,0.2);color:white;}
+        .copy-code-btn{background:var(--osu-pink);color:white;border:none;padding:7px 16px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;}
+        .copy-code-btn:hover{background:var(--osu-pink-dark);}.copy-code-btn.copied{background:var(--accent-green);color:#000;}
+        .code-scroll{flex:1;overflow:auto;min-height:0;}
+        .code-scroll::-webkit-scrollbar{width:8px;height:8px;}.code-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+        .code-scroll pre{margin:0;padding:20px;color:#b4c7e7;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre;min-width:max-content;}
+    </style>
+</head>
+<body>
+<div class="page-body">
+    <header>
+        <a href="Osvato.html" class="logo"><span>Os</span>vato.</a>
+        <span class="page-title" id="page-title">Goal Progress Bar</span>
+        <a href="Osvato.html" class="back-btn">← Back</a>
+    </header>
+    <div class="editor-row">
+        <aside class="left-panel">
+            <div class="section">
+                <div class="section-title">Colors</div>
+                <div class="color-field"><label>Accent Color</label><input type="color" id="accent-color" value="#0391e2"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Content</div>
+                <div class="field"><label>Label</label><input type="text" id="goal-label" value="Daily Performance Gain"></div>
+                <div class="two-col">
+                    <div class="field"><label>Current Value</label><input type="number" id="current-val" value="74" min="0"></div>
+                    <div class="field"><label>Target Value</label><input type="number" id="target-val" value="100" min="1"></div>
+                </div>
+                <div class="field"><label>Unit</label><input type="text" id="unit" value="PP"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Position</div>
+                <div class="two-col">
+                    <div class="field"><label>Top</label><input type="text" id="pos-top" value="30px"></div>
+                    <div class="field"><label>Left</label><input type="text" id="pos-left" value="30px"></div>
+                </div>
+            </div>
+            <div class="section">
+                <button class="action-btn" onclick="copyCode()">Copy Code</button>
+                <button class="action-btn" onclick="downloadCode()">Download .html</button>
+                <button class="action-btn secondary" onclick="resetAll()">↺ Reset</button>
+            </div>
+        </aside>
+        <section class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview',this)">Live Preview</button>
+                <button class="tab" onclick="switchTab('code',this)">Code</button>
+            </div>
+            <div class="tab-pane active" id="tab-preview">
+                <div class="preview-area" id="preview-area">
+                    <div class="goal-container" id="goal-root" style="--goal-accent:#0391e2;">
+                        <div class="goal-header">
+                            <span class="goal-title" id="prev-label">Daily Performance Gain</span>
+                            <span class="goal-values"><span id="prev-current">74</span> / <span id="prev-target">100</span> <span id="prev-unit" style="color:#fff;">PP</span></span>
+                        </div>
+                        <div class="goal-track">
+                            <div class="goal-fill" id="prev-fill" style="width:74%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <label>Background:</label>
+                    <select id="bg-select" onchange="changeBg(this.value)">
+                        <option value="#050508">Dark (default)</option>
+                        <option value="#000000">Pure Black</option>
+                        <option value="#1a1a2e">Deep Blue</option>
+                        <option value="#2a1a2e">Purple</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-code">
+                <div class="code-toolbar">
+                    <div class="code-meta"><span class="lang-tag">HTML</span><span class="line-count" id="line-count"></span></div>
+                    <div class="code-actions">
+                        <button class="dl-btn" onclick="downloadCode()">Download .html</button>
+                        <button class="copy-code-btn" id="copy-code-btn" onclick="copyCode()">Copy Code</button>
+                    </div>
+                </div>
+                <div class="code-scroll"><pre id="code-output"></pre></div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    let ITEM = null;
+    const ITEM_ID = 5;
+    const state = { accentColor:'#0391e2', label:'Daily Performance Gain', currentValue:74, targetValue:100, unit:'PP', posTop:'30px', posLeft:'30px', bgColor:'#050508' };
+
+    async function loadItem() {
+        try {
+            const res = await fetch('Elements/Elements.json');
+            const data = await res.json();
+            ITEM = data.items.find(i => i.id === ITEM_ID);
+            if (ITEM) { document.getElementById('page-title').textContent = ITEM.title; applyDefaults(ITEM.defaults); }
+        } catch(e) { console.warn('Could not load Elements.json:', e); }
+        refresh();
+    }
+
+    function applyDefaults(d) {
+        state.accentColor = d.accentColor||'#0391e2';
+        state.label = d.label||'Daily Performance Gain';
+        state.currentValue = d.currentValue||74;
+        state.targetValue = d.targetValue||100;
+        state.unit = d.unit||'PP';
+        state.posTop = d.positionTop||'30px';
+        state.posLeft = d.positionLeft||'30px';
+        document.getElementById('accent-color').value = state.accentColor;
+        document.getElementById('goal-label').value = state.label;
+        document.getElementById('current-val').value = state.currentValue;
+        document.getElementById('target-val').value = state.targetValue;
+        document.getElementById('unit').value = state.unit;
+        document.getElementById('pos-top').value = state.posTop;
+        document.getElementById('pos-left').value = state.posLeft;
+    }
+
+    function updatePreview() {
+        const pct = Math.min(100, Math.max(0, (state.currentValue / state.targetValue) * 100));
+        document.getElementById('preview-area').style.backgroundColor = state.bgColor;
+        document.getElementById('goal-root').style.setProperty('--goal-accent', state.accentColor);
+        document.getElementById('prev-label').textContent = state.label;
+        document.getElementById('prev-current').textContent = state.currentValue;
+        document.getElementById('prev-current').style.color = state.accentColor;
+        document.getElementById('prev-target').textContent = state.targetValue;
+        document.getElementById('prev-unit').textContent = state.unit;
+        document.getElementById('prev-fill').style.width = pct + '%';
+        document.getElementById('prev-fill').style.background = `linear-gradient(90deg, #16161f, ${state.accentColor})`;
+        document.getElementById('prev-fill').style.boxShadow = `3px 0 12px ${state.accentColor}`;
+    }
+
+    function generateCode() {
+        if (!ITEM) return '';
+        const {accentColor,label,currentValue,targetValue,unit,posTop,posLeft} = state;
+        const pct = Math.min(100,Math.max(0,Math.round((currentValue/targetValue)*100)));
+        let code = ITEM.code
+            .replace(/\{\{accentColor\}\}/g, accentColor)
+            .replace(/\{\{trackBg\}\}/g, '#16161f')
+            .replace(/\{\{label\}\}/g, label)
+            .replace(/\{\{currentValue\}\}/g, currentValue)
+            .replace(/\{\{targetValue\}\}/g, targetValue)
+            .replace(/\{\{unit\}\}/g, unit)
+            .replace(/\{\{positionTop\}\}/g, posTop)
+            .replace(/\{\{positionLeft\}\}/g, posLeft)
+            .replace(/\{\{fillPercent\}\}/g, pct);
+        document.getElementById('code-output').textContent = code;
+        document.getElementById('line-count').textContent = code.split('\n').length + ' lines';
+        return code;
+    }
+
+    function refresh(){updatePreview();generateCode();}
+
+    document.getElementById('accent-color').addEventListener('input',function(){state.accentColor=this.value;refresh();});
+    document.getElementById('goal-label').addEventListener('input',function(){state.label=this.value;refresh();});
+    document.getElementById('current-val').addEventListener('input',function(){state.currentValue=parseFloat(this.value)||0;refresh();});
+    document.getElementById('target-val').addEventListener('input',function(){state.targetValue=parseFloat(this.value)||100;refresh();});
+    document.getElementById('unit').addEventListener('input',function(){state.unit=this.value;refresh();});
+    document.getElementById('pos-top').addEventListener('input',function(){state.posTop=this.value;refresh();});
+    document.getElementById('pos-left').addEventListener('input',function(){state.posLeft=this.value;refresh();});
+
+    function changeBg(v){state.bgColor=v;document.getElementById('preview-area').style.backgroundColor=v;}
+    function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
+    function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
+    function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-goal-bar.html'});a.click();URL.revokeObjectURL(a.href);}
+    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);document.getElementById('bg-select').value='#050508';changeBg('#050508');refresh();}
+
+    loadItem();
+</script>
+</body>
+</html>

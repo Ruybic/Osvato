@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Alerts Ledger — Osvato Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --osu-pink:#ff66aa; --osu-pink-dark:#cc4488; --dark-base:#121216; --dark-deeper:#0a0a0c; --panel-bg:#1c1c22; --panel-border:rgba(255,255,255,0.08); --text-main:#fff; --text-muted:#8888a0; --accent-green:#00e676; }
+        *,*::before,*::after{box-sizing:border-box;}
+        html,body{height:100%;margin:0;padding:0;background:var(--dark-base);color:var(--text-main);font-family:'Exo 2',sans-serif;overflow:hidden;}
+        header{background:var(--dark-deeper);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,102,170,0.15);height:64px;flex-shrink:0;}
+        .logo{font-weight:900;font-size:22px;text-decoration:none;color:white;letter-spacing:0.5px;}.logo span{color:var(--osu-pink);}
+        .page-title{font-size:14px;font-weight:800;color:white;}
+        .back-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 16px;border-radius:6px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+        .back-btn:hover{color:white;border-color:rgba(255,255,255,0.25);}
+        .page-body{display:flex;flex-direction:column;height:100vh;}
+        .editor-row{display:flex;flex:1;min-height:0;}
+        .left-panel{width:300px;flex-shrink:0;background:var(--dark-deeper);border-right:1px solid var(--panel-border);overflow-y:auto;overflow-x:hidden;}
+        .left-panel::-webkit-scrollbar{width:5px;}.left-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px;}
+        .section{padding:16px 20px;border-bottom:1px solid var(--panel-border);}
+        .section-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;}
+        .field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+        .field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .field input[type="text"],.field input[type="number"]{width:100%;background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:8px 10px;border-radius:5px;font-family:'Exo 2';font-size:13px;font-weight:600;}
+        .field input:focus{outline:none;border-color:var(--osu-pink);}
+        .color-field label{display:block;font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px;}
+        .color-field input[type="color"]{width:100%;height:34px;border-radius:5px;padding:2px 4px;background:var(--panel-bg);border:1px solid var(--panel-border);cursor:pointer;}
+        .event-block{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:6px;padding:12px;margin-bottom:8px;}
+        .event-block:last-child{margin-bottom:0;}
+        .event-block-hdr{font-size:10px;font-weight:800;color:var(--osu-pink);margin-bottom:8px;text-transform:uppercase;}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+        .info-box{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--text-muted);line-height:1.6;}
+        .info-box strong{color:white;}
+        .action-btn{width:100%;background:var(--osu-pink);color:white;border:none;padding:10px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;margin-bottom:8px;}
+        .action-btn:last-child{margin-bottom:0;}.action-btn:hover{background:var(--osu-pink-dark);}
+        .action-btn.secondary{background:transparent;color:var(--text-muted);border:1px solid var(--panel-border);font-weight:700;}
+        .action-btn.secondary:hover{color:#ff6b6b;border-color:rgba(255,80,80,0.4);background:transparent;}
+        .right-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+        .tabs{display:flex;background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:0 20px;flex-shrink:0;}
+        .tab{padding:14px 18px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;border:none;background:transparent;font-family:'Exo 2';border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+        .tab.active{color:white;border-bottom-color:var(--osu-pink);}.tab:hover:not(.active){color:rgba(255,255,255,0.6);}
+        .tab-pane{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}.tab-pane.active{display:flex;}
+        .preview-area{flex:1;overflow:hidden;position:relative;background-color:#050508;background-image:radial-gradient(rgba(255,255,255,0.1) 1.5px,transparent 1.5px);background-size:20px 20px;animation:panBg 15s linear infinite;display:flex;align-items:flex-start;justify-content:flex-start;padding:30px;}
+        @keyframes panBg{from{background-position:0 0;}to{background-position:-40px -40px;}}
+        .preview-footer{background:var(--dark-deeper);border-top:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:12px;flex-shrink:0;}
+        .preview-footer label{color:var(--text-muted);font-weight:700;}
+        .preview-footer select{background:var(--panel-bg);border:1px solid var(--panel-border);color:white;padding:5px 8px;border-radius:4px;font-family:'Exo 2';font-size:12px;font-weight:600;}
+
+        /* LEDGER COMPONENT */
+        .telemetry-ledger{background:#0b0b0f;border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;box-shadow:0 25px 50px rgba(0,0,0,0.9);font-family:'Exo 2',sans-serif;}
+        .ledger-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);position:relative;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+        .ledger-row:last-child{border-bottom:none;}
+        .event-type{font-weight:900;color:#7e7e8a;font-size:10px;}
+        .event-user{font-weight:900;color:#fff;}
+        .new-alert-active{animation:flashbangInversion 1.2s cubic-bezier(0.16,1,0.3,1) both;}
+        @keyframes flashbangInversion{0%{background:#fff;color:#000;box-shadow:0 0 30px rgba(255,255,255,0.6);}15%{background:#fff;color:#000;box-shadow:0 0 40px rgba(255,255,255,0.8);}100%{background:#0b0b0f;color:#fff;box-shadow:none;}}
+
+        /* CODE */
+        .code-toolbar{background:var(--dark-deeper);border-bottom:1px solid var(--panel-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+        .code-meta{display:flex;align-items:center;gap:10px;}
+        .lang-tag{background:rgba(255,102,170,0.1);border:1px solid rgba(255,102,170,0.2);color:var(--osu-pink);padding:3px 9px;border-radius:4px;font-size:11px;font-weight:800;}
+        .line-count{font-size:11px;color:var(--text-muted);font-weight:600;}
+        .code-actions{display:flex;gap:8px;}
+        .dl-btn{background:transparent;border:1px solid var(--panel-border);color:var(--text-muted);padding:7px 14px;border-radius:5px;font-family:'Exo 2';font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;}
+        .dl-btn:hover{border-color:rgba(255,255,255,0.2);color:white;}
+        .copy-code-btn{background:var(--osu-pink);color:white;border:none;padding:7px 16px;border-radius:5px;font-family:'Exo 2';font-weight:800;font-size:13px;cursor:pointer;transition:background 0.2s;}
+        .copy-code-btn:hover{background:var(--osu-pink-dark);}.copy-code-btn.copied{background:var(--accent-green);color:#000;}
+        .code-scroll{flex:1;overflow:auto;min-height:0;}
+        .code-scroll::-webkit-scrollbar{width:8px;height:8px;}.code-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+        .code-scroll pre{margin:0;padding:20px;color:#b4c7e7;font-family:'Courier New',monospace;font-size:12px;line-height:1.6;white-space:pre;min-width:max-content;}
+    </style>
+</head>
+<body>
+<div class="page-body">
+    <header>
+        <a href="Osvato.html" class="logo"><span>Os</span>vato.</a>
+        <span class="page-title" id="page-title">Stream Alerts Ledger</span>
+        <a href="Osvato.html" class="back-btn">← Back</a>
+    </header>
+    <div class="editor-row">
+        <aside class="left-panel">
+            <div class="section">
+                <div class="section-title">Appearance</div>
+                <div class="color-field" style="margin-bottom:10px;"><label>Background</label><input type="color" id="bg-solid" value="#0b0b0f"></div>
+                <div class="color-field" style="margin-bottom:10px;"><label>Text / Flash Color</label><input type="color" id="neon-color" value="#ffffff"></div>
+                <div class="field"><label>Width (px)</label><input type="number" id="ledger-width" value="320" min="200" max="600"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Timing</div>
+                <div class="field"><label>Cycle Interval (ms)</label><input type="number" id="interval-ms" value="4000" min="1000" step="500"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">Initial Events</div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="ev-type" data-idx="0" value="Latest Sub"></div>
+                        <div class="field"><label>User</label><input type="text" class="ev-user" data-idx="0" value="Hypersonic_Osu"></div>
+                    </div>
+                </div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="ev-type" data-idx="1" value="Top Cheer"></div>
+                        <div class="field"><label>User</label><input type="text" class="ev-user" data-idx="1" value="Scorpiour_77"></div>
+                    </div>
+                </div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="ev-type" data-idx="2" value="Follower"></div>
+                        <div class="field"><label>User</label><input type="text" class="ev-user" data-idx="2" value="Velo_City"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-title">Mock Feed (cycles in)</div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="feed-type" data-idx="0" value="Donation"></div>
+                        <div class="field"><label>User</label><input type="text" class="feed-user" data-idx="0" value="RhythmMaster ($20.00)"></div>
+                    </div>
+                </div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="feed-type" data-idx="1" value="Latest Sub"></div>
+                        <div class="field"><label>User</label><input type="text" class="feed-user" data-idx="1" value="Heaven501"></div>
+                    </div>
+                </div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="feed-type" data-idx="2" value="Follower"></div>
+                        <div class="field"><label>User</label><input type="text" class="feed-user" data-idx="2" value="Zero_G_Player"></div>
+                    </div>
+                </div>
+                <div class="event-block">
+                    <div class="two-col">
+                        <div class="field"><label>Type</label><input type="text" class="feed-type" data-idx="3" value="Resub x12"></div>
+                        <div class="field"><label>User</label><input type="text" class="feed-user" data-idx="3" value="Matrix_Core"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="info-box"><strong>How it works</strong><br>The initial events show on load. The mock feed cycles in from top every interval — replace with your alert service webhook in production.</div>
+            </div>
+            <div class="section">
+                <button class="action-btn" onclick="copyCode()">Copy Code</button>
+                <button class="action-btn" onclick="downloadCode()">Download .html</button>
+                <button class="action-btn secondary" onclick="resetAll()">↺ Reset</button>
+            </div>
+        </aside>
+        <section class="right-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview',this)">Live Preview</button>
+                <button class="tab" onclick="switchTab('code',this)">Code</button>
+            </div>
+            <div class="tab-pane active" id="tab-preview">
+                <div class="preview-area" id="preview-area">
+                    <div class="telemetry-ledger" id="prev-ledger" style="width:320px;"></div>
+                </div>
+                <div class="preview-footer">
+                    <label>Background:</label>
+                    <select id="bg-select" onchange="changeBg(this.value)">
+                        <option value="#050508">Dark (default)</option>
+                        <option value="#000000">Pure Black</option>
+                        <option value="#1a1a2e">Deep Blue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-code">
+                <div class="code-toolbar">
+                    <div class="code-meta"><span class="lang-tag">HTML</span><span class="line-count" id="line-count"></span></div>
+                    <div class="code-actions">
+                        <button class="dl-btn" onclick="downloadCode()">Download .html</button>
+                        <button class="copy-code-btn" id="copy-code-btn" onclick="copyCode()">Copy Code</button>
+                    </div>
+                </div>
+                <div class="code-scroll"><pre id="code-output"></pre></div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    let ITEM = null;
+    const ITEM_ID = 7;
+    const state = {
+        bgSolid:'#0b0b0f', neonColor:'#ffffff', ledgerWidth:320, intervalMs:4000, bgColor:'#050508',
+        events:[{type:'Latest Sub',user:'Hypersonic_Osu'},{type:'Top Cheer',user:'Scorpiour_77'},{type:'Follower',user:'Velo_City'}],
+        mockFeed:[{type:'Donation',user:'RhythmMaster ($20.00)'},{type:'Latest Sub',user:'Heaven501'},{type:'Follower',user:'Zero_G_Player'},{type:'Resub x12',user:'Matrix_Core'}]
+    };
+    let previewTimer = null;
+    let previewFeedIdx = 0;
+
+    async function loadItem() {
+        try {
+            const res = await fetch('Elements/Elements.json');
+            const data = await res.json();
+            ITEM = data.items.find(i => i.id === ITEM_ID);
+            if (ITEM) { document.getElementById('page-title').textContent = ITEM.title; applyDefaults(ITEM.defaults); }
+        } catch(e) { console.warn('Could not load Elements.json:', e); }
+        refresh();
+        startPreviewCycle();
+    }
+
+    function applyDefaults(d) {
+        state.bgSolid = d.bgSolid||'#0b0b0f'; document.getElementById('bg-solid').value = state.bgSolid;
+        state.neonColor = d.neonColor||'#ffffff'; document.getElementById('neon-color').value = state.neonColor;
+        state.ledgerWidth = d.ledgerWidth||320; document.getElementById('ledger-width').value = state.ledgerWidth;
+        state.intervalMs = d.intervalMs||4000; document.getElementById('interval-ms').value = state.intervalMs;
+        if(d.events) { state.events=d.events.slice(0,3); document.querySelectorAll('.ev-type').forEach(el=>{if(state.events[el.dataset.idx])el.value=state.events[el.dataset.idx].type;}); document.querySelectorAll('.ev-user').forEach(el=>{if(state.events[el.dataset.idx])el.value=state.events[el.dataset.idx].user;}); }
+        if(d.mockFeed) { state.mockFeed=d.mockFeed.slice(0,4); document.querySelectorAll('.feed-type').forEach(el=>{if(state.mockFeed[el.dataset.idx])el.value=state.mockFeed[el.dataset.idx].type;}); document.querySelectorAll('.feed-user').forEach(el=>{if(state.mockFeed[el.dataset.idx])el.value=state.mockFeed[el.dataset.idx].user;}); }
+    }
+
+    function buildLedger(ledger) {
+        ledger.innerHTML = '';
+        ledger.style.width = state.ledgerWidth + 'px';
+        ledger.style.background = state.bgSolid;
+        state.events.forEach(e => {
+            const r = document.createElement('div');
+            r.className = 'ledger-row';
+            r.style.background = state.bgSolid;
+            r.style.color = state.neonColor;
+            r.style.borderBottomColor = 'rgba(255,255,255,0.08)';
+            r.innerHTML = `<span class="event-type">${e.type}</span><span class="event-user">${e.user}</span>`;
+            ledger.appendChild(r);
+        });
+    }
+
+    function startPreviewCycle() {
+        if (previewTimer) clearInterval(previewTimer);
+        previewFeedIdx = 0;
+        previewTimer = setInterval(() => {
+            const ledger = document.getElementById('prev-ledger');
+            if (ledger.children.length >= 4) ledger.removeChild(ledger.lastElementChild);
+            const e = state.mockFeed[previewFeedIdx % state.mockFeed.length];
+            const r = document.createElement('div');
+            r.className = 'ledger-row new-alert-active';
+            r.style.color = state.neonColor;
+            r.innerHTML = `<span class="event-type">${e.type}</span><span class="event-user">${e.user}</span>`;
+            ledger.insertBefore(r, ledger.firstChild);
+            previewFeedIdx++;
+        }, state.intervalMs);
+    }
+
+    function updatePreview() {
+        buildLedger(document.getElementById('prev-ledger'));
+        document.getElementById('preview-area').style.backgroundColor = state.bgColor;
+    }
+
+    function generateCode() {
+        if (!ITEM) return '';
+        const {bgSolid,neonColor,ledgerWidth,intervalMs,events,mockFeed} = state;
+        const borderColor = 'rgba(255,255,255,0.08)';
+        let code = ITEM.code
+            .replace(/\{\{bgSolid\}\}/g, bgSolid)
+            .replace(/\{\{borderColor\}\}/g, borderColor)
+            .replace(/\{\{neonColor\}\}/g, neonColor)
+            .replace(/\{\{ledgerWidth\}\}/g, ledgerWidth)
+            .replace(/\{\{intervalMs\}\}/g, intervalMs)
+            .replace(/\{\{eventsJSON\}\}/g, JSON.stringify(events))
+            .replace(/\{\{feedJSON\}\}/g, JSON.stringify(mockFeed));
+        document.getElementById('code-output').textContent = code;
+        document.getElementById('line-count').textContent = code.split('\n').length + ' lines';
+        return code;
+    }
+
+    function refresh() { updatePreview(); generateCode(); }
+
+    document.getElementById('bg-solid').addEventListener('input',function(){state.bgSolid=this.value;refresh();});
+    document.getElementById('neon-color').addEventListener('input',function(){state.neonColor=this.value;refresh();});
+    document.getElementById('ledger-width').addEventListener('input',function(){state.ledgerWidth=parseInt(this.value)||320;refresh();});
+    document.getElementById('interval-ms').addEventListener('input',function(){state.intervalMs=parseInt(this.value)||4000;if(previewTimer){clearInterval(previewTimer);startPreviewCycle();}generateCode();});
+    document.querySelectorAll('.ev-type').forEach(el=>el.addEventListener('input',function(){if(!state.events[this.dataset.idx])state.events[this.dataset.idx]={type:'',user:''};state.events[this.dataset.idx].type=this.value;refresh();}));
+    document.querySelectorAll('.ev-user').forEach(el=>el.addEventListener('input',function(){if(!state.events[this.dataset.idx])state.events[this.dataset.idx]={type:'',user:''};state.events[this.dataset.idx].user=this.value;refresh();}));
+    document.querySelectorAll('.feed-type').forEach(el=>el.addEventListener('input',function(){if(!state.mockFeed[this.dataset.idx])state.mockFeed[this.dataset.idx]={type:'',user:''};state.mockFeed[this.dataset.idx].type=this.value;generateCode();}));
+    document.querySelectorAll('.feed-user').forEach(el=>el.addEventListener('input',function(){if(!state.mockFeed[this.dataset.idx])state.mockFeed[this.dataset.idx]={type:'',user:''};state.mockFeed[this.dataset.idx].user=this.value;generateCode();}));
+
+    function changeBg(v){state.bgColor=v;document.getElementById('preview-area').style.backgroundColor=v;}
+    function switchTab(n,b){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');b.classList.add('active');}
+    function copyCode(){navigator.clipboard.writeText(generateCode()).then(()=>{const b=document.getElementById('copy-code-btn');b.textContent='✓ Copied!';b.classList.add('copied');setTimeout(()=>{b.textContent='Copy Code';b.classList.remove('copied');},2500);});}
+    function downloadCode(){const blob=new Blob([generateCode()],{type:'text/html'});const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'osvato-alerts-ledger.html'});a.click();URL.revokeObjectURL(a.href);}
+    function resetAll(){if(ITEM)applyDefaults(ITEM.defaults);document.getElementById('bg-select').value='#050508';changeBg('#050508');clearInterval(previewTimer);refresh();startPreviewCycle();}
+
+    loadItem();
+</script>
+</body>
+</html>
